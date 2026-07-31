@@ -152,8 +152,16 @@ echo "   ✓ theme activated"
 # A block that is registered renders; a block that is merely PRESENT on disk but
 # not registered does not. Ask WordPress what it actually knows about, rather
 # than trusting that the files landed.
-MISSING=$($SSH "$HOST" "cd /var/www/$SITE/public && wp eval 'foreach ([\"nameplate\",\"folio\",\"utility-bar\",\"byline\",\"toc\"] as \$b) { if ( ! WP_Block_Type_Registry::get_instance()->is_registered(\"broadside/\$b\") ) echo \$b, \" \"; }' --allow-root 2>/dev/null" | tr -d '\r')
-if [ -n "${MISSING// /}" ]; then
+# PHP 8.5 + Elementor flood wp-cli stdout with deprecation notices (WP error
+# handler), so a bare echo of missing names gets drowned. Use a sentinel line
+# and parse only that — never treat notice text as a registration failure.
+MISSING=$($SSH "$HOST" "cd /var/www/$SITE/public && wp eval '\$m=[]; foreach ([\"nameplate\",\"folio\",\"utility-bar\",\"byline\",\"toc\"] as \$b) { if ( ! WP_Block_Type_Registry::get_instance()->is_registered(\"broadside/\$b\") ) \$m[]=\$b; } echo \"BROADSIDE_BLOCKS:\".implode(\",\",\$m).\":END\n\";' --allow-root 2>&1" \
+  | tr -d '\r' \
+  | sed -n 's/.*BROADSIDE_BLOCKS:\([^:]*\):END.*/\1/p' \
+  | head -1 \
+  | tr ',' ' ' \
+  | xargs)
+if [ -n "${MISSING}" ]; then
   red "✗ blocks NOT registered after activation: $MISSING"
   red "  The theme would render a page with no masthead. Refusing to leave it live."
   $SSH "$HOST" "cd /var/www/$SITE/public && wp theme activate twentytwentyfive --allow-root" >/dev/null
