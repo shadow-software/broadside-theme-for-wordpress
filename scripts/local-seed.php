@@ -98,6 +98,14 @@ $canary = wp_insert_post(
 
 echo "  canary post: {$canary} (contains digest/toc + headings — the recursion path)\n";
 
+// Podcast meta — exercises /feed/podcast/ and the on-article player. Uses a real
+// production MP3 so the enclosure URL is valid HTTPS audio/mpeg.
+if ( $canary && ! is_wp_error( $canary ) ) {
+	update_post_meta( (int) $canary, 'podcast_audio_url', 'https://marksmansdigest.com/wp-content/uploads/2026/07/episode-121-10.mp3' );
+	update_post_meta( (int) $canary, 'podcast_bytes', 4500000 );
+	update_post_meta( (int) $canary, 'podcast_duration', '18:30' );
+}
+
 // A few more so the front page grid, the briefs rail and the related block have
 // something to chew on.
 //
@@ -143,6 +151,14 @@ $mods = array(
 	'shadow_digest_motto' => 'Steady Hands, Straight Talk',
 	'shadow_digest_newsletter_name' => 'The Weekly Dispatch',
 	'shadow_digest_standards' => 'Digest reports independently and has done so since 1926.',
+	'shadow_digest_podcast_enable' => true,
+	'shadow_digest_podcast_title' => "Marksman's Digest",
+	'shadow_digest_podcast_summary' => 'Narrated features for the American marksman.',
+	'shadow_digest_podcast_author' => "Marksman's Digest",
+	'shadow_digest_podcast_owner_name' => 'Shadow Software',
+	'shadow_digest_podcast_owner_email' => 'podcast@marksmansdigest.com',
+	'shadow_digest_podcast_category' => 'News',
+	'shadow_digest_podcast_player_label' => 'Listen',
 );
 
 foreach ( $mods as $k => $v ) {

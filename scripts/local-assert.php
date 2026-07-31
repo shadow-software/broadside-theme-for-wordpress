@@ -359,6 +359,22 @@ check(
 	'a schema.org name (organisation, breadcrumb, FAQ question) contains an entity'
 );
 
+echo "\n── Podcast feed + on-article player\n";
+
+$feed = get( $base . '/feed/podcast/' );
+check( 200 === $feed['code'], 'podcast feed returns HTTP 200', "got {$feed['code']}" );
+check( str_contains( $feed['body'], '<rss' ), 'podcast feed is RSS XML' );
+check( str_contains( $feed['body'], 'xmlns:itunes=' ), 'podcast feed declares itunes namespace' );
+check( str_contains( $feed['body'], '<enclosure ' ), 'podcast feed has at least one enclosure' );
+check( str_contains( $feed['body'], 'type="audio/mpeg"' ), 'enclosure is audio/mpeg' );
+check( str_contains( $feed['body'], 'episode-121-10.mp3' ), 'enclosure points at the seeded episode audio' );
+check( str_contains( $feed['body'], '<itunes:owner>' ), 'feed includes itunes:owner' );
+check( str_contains( $feed['body'], 'podcast@marksmansdigest.com' ), 'owner email is present (Apple requirement)' );
+
+check( str_contains( $html, 'digest-podcast__player' ), 'canary article renders the audio player' );
+check( str_contains( $html, 'episode-121-10.mp3' ), 'player src is the seeded podcast_audio_url' );
+check( str_contains( $html, 'rel="alternate" type="application/rss+xml"' ) && str_contains( $html, '/feed/podcast/' ), 'article <head> advertises the podcast feed' );
+
 echo "\n";
 echo str_repeat( '─', 70 ) . "\n";
 

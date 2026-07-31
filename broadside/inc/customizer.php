@@ -375,6 +375,107 @@ function shadow_digest_settings(): array {
 
 		/*
 		 * ----------------------------------------------------------------
+		 * Podcast — optional narrated-audio companion to each article.
+		 * ----------------------------------------------------------------
+		 */
+
+		'shadow_digest_podcast_enable'          => array(
+			'default'  => false,
+			'sanitize' => 'shadow_digest_sanitize_checkbox',
+			'type'     => 'checkbox',
+			'section'  => 'shadow_digest_podcast',
+			'label'    => __( 'Enable podcast feed + player', 'broadside' ),
+			'help'     => __( 'Serves /feed/podcast/ for Apple, Spotify and Google, and shows an audio player on posts that have a podcast_audio_url.', 'broadside' ),
+		),
+
+		'shadow_digest_podcast_title'           => array(
+			'default'   => '',
+			'sanitize'  => 'sanitize_text_field',
+			'type'      => 'text',
+			'section'   => 'shadow_digest_podcast',
+			'label'     => __( 'Show title', 'broadside' ),
+			'help'      => __( 'Leave empty to use the site name.', 'broadside' ),
+			'transport' => 'postMessage',
+		),
+
+		'shadow_digest_podcast_summary'         => array(
+			'default'   => '',
+			'sanitize'  => 'sanitize_textarea_field',
+			'type'      => 'textarea',
+			'section'   => 'shadow_digest_podcast',
+			'label'     => __( 'Show summary', 'broadside' ),
+			'help'      => __( 'One or two sentences for the directory listing. Leave empty to use the site tagline.', 'broadside' ),
+			'transport' => 'postMessage',
+		),
+
+		'shadow_digest_podcast_author'          => array(
+			'default'   => '',
+			'sanitize'  => 'sanitize_text_field',
+			'type'      => 'text',
+			'section'   => 'shadow_digest_podcast',
+			'label'     => __( 'Show author', 'broadside' ),
+			'help'      => __( 'itunes:author. Leave empty to use the site name.', 'broadside' ),
+			'transport' => 'postMessage',
+		),
+
+		'shadow_digest_podcast_owner_name'      => array(
+			'default'   => '',
+			'sanitize'  => 'sanitize_text_field',
+			'type'      => 'text',
+			'section'   => 'shadow_digest_podcast',
+			'label'     => __( 'Owner name', 'broadside' ),
+			'help'      => __( 'Shown only to directories (itunes:owner). Defaults to the show author.', 'broadside' ),
+			'transport' => 'postMessage',
+		),
+
+		'shadow_digest_podcast_owner_email'     => array(
+			'default'  => '',
+			'sanitize' => 'sanitize_email',
+			'type'     => 'email',
+			'section'  => 'shadow_digest_podcast',
+			'label'    => __( 'Owner email', 'broadside' ),
+			'help'     => __( 'Required by Apple Podcasts for the show owner contact. Not shown publicly on the site.', 'broadside' ),
+		),
+
+		'shadow_digest_podcast_category'        => array(
+			'default'   => 'News',
+			'sanitize'  => 'sanitize_text_field',
+			'type'      => 'text',
+			'section'   => 'shadow_digest_podcast',
+			'label'     => __( 'iTunes category', 'broadside' ),
+			'help'      => __( 'Top-level Apple Podcasts category, e.g. “News” or “Sports”.', 'broadside' ),
+			'transport' => 'postMessage',
+		),
+
+		'shadow_digest_podcast_image'           => array(
+			'default'  => '',
+			'sanitize' => 'esc_url_raw',
+			'type'     => 'url',
+			'section'  => 'shadow_digest_podcast',
+			'label'    => __( 'Show artwork URL', 'broadside' ),
+			'help'     => __( 'Square image, ideally 1400×1400 or larger. Falls back to the custom logo, then the site icon.', 'broadside' ),
+		),
+
+		'shadow_digest_podcast_explicit'        => array(
+			'default'  => false,
+			'sanitize' => 'shadow_digest_sanitize_checkbox',
+			'type'     => 'checkbox',
+			'section'  => 'shadow_digest_podcast',
+			'label'    => __( 'Mark show as explicit', 'broadside' ),
+		),
+
+		'shadow_digest_podcast_player_label'    => array(
+			'default'   => __( 'Listen', 'broadside' ),
+			'sanitize'  => 'sanitize_text_field',
+			'type'      => 'text',
+			'section'   => 'shadow_digest_podcast',
+			'label'     => __( 'Player label', 'broadside' ),
+			'help'      => __( 'Caption above the on-article audio player.', 'broadside' ),
+			'transport' => 'postMessage',
+		),
+
+		/*
+		 * ----------------------------------------------------------------
 		 * Article furniture.
 		 * ----------------------------------------------------------------
 		 */
@@ -517,6 +618,10 @@ function shadow_digest_customize_register( WP_Customize_Manager $wp_customize ):
 		'shadow_digest_newsletter' => array(
 			'title'       => __( 'Newsletter', 'broadside' ),
 			'description' => __( 'Broadside renders the signup form. It does not store subscribers or send mail — point the form at your own service.', 'broadside' ),
+		),
+		'shadow_digest_podcast'    => array(
+			'title'       => __( 'Podcast', 'broadside' ),
+			'description' => __( 'Optional narrated-audio companion. Posts with a podcast_audio_url appear in /feed/podcast/ and get an on-article player.', 'broadside' ),
 		),
 		'shadow_digest_article'    => array(
 			'title'       => __( 'Article furniture', 'broadside' ),

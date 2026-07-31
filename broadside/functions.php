@@ -24,7 +24,7 @@ defined( 'ABSPATH' ) || exit;
  * Theme version. Kept in lockstep with the "Version:" header in style.css and
  * the "Stable tag:" in readme.txt. Used to bust asset caches on upgrade.
  */
-define( 'SHADOW_DIGEST_VERSION', '1.3.7' );
+define( 'SHADOW_DIGEST_VERSION', '1.4.0' );
 
 /**
  * Absolute path to the theme directory, with a trailing slash.
@@ -42,6 +42,7 @@ require_once SHADOW_DIGEST_PATH . 'inc/template-tags.php';
 require_once SHADOW_DIGEST_PATH . 'inc/patterns.php';
 require_once SHADOW_DIGEST_PATH . 'inc/schema.php';
 require_once SHADOW_DIGEST_PATH . 'inc/views.php';
+require_once SHADOW_DIGEST_PATH . 'inc/podcast.php';
 
 /*
  * THE THEME REGISTERS NO BLOCKS. THIS IS DELIBERATE. DO NOT ADD ANY.
