@@ -2,7 +2,7 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Broadside Blocks 1.2.1\n"
+"Project-Id-Version: Broadside Blocks 1.3.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/broadside-blocks\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,7 +21,7 @@ msgstr ""
 
 #. Plugin URI of the plugin
 #: broadside-blocks.php
-msgid "https://github.com/shadow-software/broadside-wordpress-theme"
+msgid "https://github.com/shadow-software/broadside-blocks-for-wordpress"
 msgstr ""
 
 #. Description of the plugin

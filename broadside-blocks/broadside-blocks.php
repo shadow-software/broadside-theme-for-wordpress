@@ -1,9 +1,9 @@
 <?php
 /**
  * Plugin Name:       Broadside Blocks
- * Plugin URI:        https://github.com/shadow-software/broadside-wordpress-theme
+ * Plugin URI:        https://github.com/shadow-software/broadside-blocks-for-wordpress
  * Description:       The editorial blocks and masthead furniture for the Broadside theme — a short-answer box, key takeaways, a self-building table of contents, an FAQ that emits FAQPage schema, a sources list, a disclosure table, and the nameplate, folio rule and bylines a broadsheet needs.
- * Version:           1.3.1
+ * Version:           1.3.2
  * Requires at least: 6.6
  * Requires PHP:      8.0
  * Author:            Shadow Software LLC
@@ -73,7 +73,7 @@ defined( 'ABSPATH' ) || exit;
  */
 define( 'BROADSIDE_BLOCKS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'BROADSIDE_BLOCKS_URL', plugin_dir_url( __FILE__ ) );
-define( 'BROADSIDE_BLOCKS_VERSION', '1.3.1' );
+define( 'BROADSIDE_BLOCKS_VERSION', '1.3.2' );
 
 /**
  * Is the Broadside theme active?
@@ -119,21 +119,11 @@ function broadside_blocks_admin_notice(): void {
 }
 add_action( 'admin_notices', 'broadside_blocks_admin_notice' );
 
-/**
- * Translations for the plugin's own strings.
- *
- * The blocks carry ~60 translatable strings of their own. They used to sit in the
- * theme's text domain; they are this plugin's strings now and travel in this
- * plugin's domain.
- *
- * @since 1.2.0
- *
- * @return void
+/*
+ * Translations: WordPress.org auto-loads the text domain for plugins hosted
+ * there since 4.6. No load_plugin_textdomain() call — the directory review
+ * flags it as unnecessary.
  */
-function broadside_blocks_load_textdomain(): void {
-	load_plugin_textdomain( 'broadside-blocks', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
-}
-add_action( 'init', 'broadside_blocks_load_textdomain' );
 
 /*
  * A NOTE ON shadow_digest_plain_text(), AND ON A FATAL I NEARLY SHIPPED.

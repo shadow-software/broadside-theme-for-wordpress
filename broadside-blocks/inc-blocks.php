@@ -606,23 +606,22 @@ function shadow_digest_print_faq_schema(): void {
 		);
 	}
 
+	// Default wp_json_encode() escapes solidus as \/ so a user-supplied
+	// </script> sequence cannot break out of the script element. Do not pass
+	// JSON_UNESCAPED_SLASHES here — that was the review finding.
 	$json = wp_json_encode(
 		array(
 			'@context'   => 'https://schema.org',
 			'@type'      => 'FAQPage',
 			'mainEntity' => $entities,
-		),
-		JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+		)
 	);
 
 	if ( false === $json ) {
 		return;
 	}
 
-	printf(
-		'<script type="application/ld+json">%s</script>' . "\n",
-		$json // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_json_encode() output inside a JSON-LD script element.
-	);
+	echo '<script type="application/ld+json">' . $json . '</script>' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_json_encode() with default flags; JSON-LD must remain valid JSON.
 }
 add_action( 'wp_footer', 'shadow_digest_print_faq_schema' );
 
