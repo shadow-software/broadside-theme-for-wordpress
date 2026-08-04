@@ -4,7 +4,7 @@
  *
  * Episodes are ordinary posts that carry `podcast_audio_url` (and optional
  * `podcast_media_id` / `podcast_bytes` / `podcast_duration`) post meta — written
- * by the n8n Marksman Digest podcast generator. This file:
+ * by the n8n Cannabis Digest and Marksman Digest podcast generators. This file:
  *
  *   1. Registers those meta keys for the REST API (so n8n can write them).
  *   2. Serves an iTunes-/Spotify-/Google-compatible feed at /feed/podcast/.
