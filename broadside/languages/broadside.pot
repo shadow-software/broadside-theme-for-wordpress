@@ -20,11 +20,6 @@ msgstr ""
 msgid "Broadside"
 msgstr ""
 
-#. Theme URI of the theme
-#: style.css
-msgid "https://github.com/shadow-software/broadside-wordpress-theme"
-msgstr ""
-
 #. Description of the theme
 #: style.css
 msgid "A block theme for news publications and journals of record. Broadside dresses a modern WordPress site as a broadsheet newspaper: a blackletter masthead, a folio rule, a three-column lead grid, and a long-read article layout with editorial furniture — a short-answer box, key takeaways, a table of contents, an FAQ, and a sources list. Every colour, rule and section name is a Customizer setting, so one codebase can dress two mastheads without a single hard-coded brand."

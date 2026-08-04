@@ -142,13 +142,54 @@ function shadow_digest_settings(): array {
 			'transport' => 'postMessage',
 		),
 
+		'shadow_digest_weather_enable'          => array(
+			'default'  => false,
+			'sanitize' => 'shadow_digest_sanitize_checkbox',
+			'type'     => 'checkbox',
+			'section'  => 'shadow_digest_masthead',
+			'label'    => __( 'Live weather in the left ear', 'broadside' ),
+			'help'     => __( 'When on, the left ear shows a live forecast for the city of record (Open-Meteo, cached about an hour). Falls back to the static heading and text below if the fetch fails.', 'broadside' ),
+		),
+
+		'shadow_digest_weather_lat'             => array(
+			'default'   => '',
+			'sanitize'  => 'shadow_digest_sanitize_coord',
+			'type'      => 'text',
+			'section'   => 'shadow_digest_masthead',
+			'label'     => __( 'Weather latitude', 'broadside' ),
+			'help'      => __( 'Optional. With longitude, skips geocoding — useful when the city of record is a region (e.g. Montana → Helena).', 'broadside' ),
+		),
+
+		'shadow_digest_weather_lon'             => array(
+			'default'   => '',
+			'sanitize'  => 'shadow_digest_sanitize_coord',
+			'type'      => 'text',
+			'section'   => 'shadow_digest_masthead',
+			'label'     => __( 'Weather longitude', 'broadside' ),
+			'help'      => __( 'Optional. Pair with latitude.', 'broadside' ),
+		),
+
+		'shadow_digest_weather_units'           => array(
+			'default'  => 'auto',
+			'sanitize' => 'shadow_digest_sanitize_weather_units',
+			'type'     => 'select',
+			'section'  => 'shadow_digest_masthead',
+			'label'    => __( 'Weather units', 'broadside' ),
+			'help'     => __( 'Auto picks °F/mph west of ~30°W and °C/km/h elsewhere.', 'broadside' ),
+			'choices'  => array(
+				'auto'     => __( 'Auto', 'broadside' ),
+				'metric'   => __( 'Metric (°C, km/h)', 'broadside' ),
+				'imperial' => __( 'Imperial (°F, mph)', 'broadside' ),
+			),
+		),
+
 		'shadow_digest_ear_left_title'          => array(
 			'default'   => '',
 			'sanitize'  => 'sanitize_text_field',
 			'type'      => 'text',
 			'section'   => 'shadow_digest_masthead',
 			'label'     => __( 'Left ear — heading', 'broadside' ),
-			'help'      => __( 'The small block to the left of the nameplate. Traditionally a weather or conditions report.', 'broadside' ),
+			'help'      => __( 'Fallback when live weather is off or unreachable. Traditionally a weather or conditions report.', 'broadside' ),
 			'transport' => 'postMessage',
 		),
 
@@ -158,7 +199,7 @@ function shadow_digest_settings(): array {
 			'type'      => 'textarea',
 			'section'   => 'shadow_digest_masthead',
 			'label'     => __( 'Left ear — text', 'broadside' ),
-			'help'      => __( 'Two short lines read best. Line breaks are preserved.', 'broadside' ),
+			'help'      => __( 'Fallback copy. Two short lines read best. Line breaks are preserved.', 'broadside' ),
 			'transport' => 'postMessage',
 		),
 

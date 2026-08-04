@@ -99,8 +99,14 @@ function shadow_digest_render_utility_bar(): string {
  * @return string The rendered HTML.
  */
 function shadow_digest_render_nameplate(): string {
-	$left_title  = (string) shadow_digest_get( 'shadow_digest_ear_left_title' );
-	$left_body   = (string) shadow_digest_get( 'shadow_digest_ear_left_body' );
+	if ( function_exists( 'shadow_digest_ear_left_content' ) ) {
+		$left = shadow_digest_ear_left_content();
+		$left_title = (string) ( $left['title'] ?? '' );
+		$left_body  = (string) ( $left['body'] ?? '' );
+	} else {
+		$left_title = (string) shadow_digest_get( 'shadow_digest_ear_left_title' );
+		$left_body  = (string) shadow_digest_get( 'shadow_digest_ear_left_body' );
+	}
 	$right_title = (string) shadow_digest_get( 'shadow_digest_ear_right_title' );
 	$right_body  = (string) shadow_digest_get( 'shadow_digest_ear_right_body' );
 

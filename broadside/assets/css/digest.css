@@ -2238,8 +2238,10 @@ body:has(.digest-single) .wp-site-blocks::before {
  * -------------------------------------------------------------------------- */
 
 /*
- * The Theme Directory's accessibility-ready tag requires a working skip link and
- * a visible focus style on every interactive element. Both are below.
+ * Sensible defaults for keyboard and screen-reader users: a working skip link
+ * and a visible focus style on every interactive element. Both are below.
+ * (Broadside deliberately does not claim the Theme Directory accessibility-ready
+ * tag — that tag triggers a separate review queue.)
  */
 
 .screen-reader-text {

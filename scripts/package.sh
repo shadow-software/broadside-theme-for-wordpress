@@ -154,6 +154,40 @@ else
 	note "style.css Text Domain must equal the directory name: $SLUG"
 fi
 
+# ---------------------------------------------------------------- review ----
+#
+# 2026-08 Theme Directory bounce (reviewer @bijayyadav):
+#   - accessibility-ready queues a *separate* a11y review — do not claim it
+#     unless we deliberately want that longer queue.
+#   - Theme URI, if present, must be about the theme ON WordPress.org — not a
+#     GitHub repo, product marketing page, or author homepage.
+# House rule: never ship accessibility-ready. Omit Theme URI until the theme is
+# live on wordpress.org/themes/<slug>/, then set Theme URI to that URL only.
+
+echo
+echo "── no accessibility-ready tag (separate a11y queue — house ban)"
+# Only the Tags: line is machine-read by the Directory. Prose that *disclaims*
+# the tag (as our readme does) must not trip this gate.
+tag_hits=$(grep -nE '^Tags:.*accessibility-ready' "$DIR/style.css" "$DIR/readme.txt" 2>/dev/null || true)
+if [ -n "$tag_hits" ]; then
+	note "accessibility-ready on Tags: line — remove it (queues separate a11y review)"
+	printf '%s\n' "$tag_hits" | sed 's/^/      /'
+else
+	okay "no accessibility-ready tag"
+fi
+
+echo
+echo "── Theme URI is omitted or points at wordpress.org/themes/ only"
+if theme_uri=$(grep -oP '^Theme URI:\s*\K\S+' "$DIR/style.css" 2>/dev/null); then
+	if printf '%s' "$theme_uri" | grep -qiE '^https?://(www\.)?wordpress\.org/themes/'; then
+		okay "Theme URI is the directory page: $theme_uri"
+	else
+		note "Theme URI must be about this theme on WordPress.org (got: $theme_uri) — omit it, or use https://wordpress.org/themes/$SLUG/"
+	fi
+else
+	okay "Theme URI omitted (valid until the theme is live on the Directory)"
+fi
+
 # ---------------------------------------------------------------- naming ----
 #
 # The first submission was rejected on the name:

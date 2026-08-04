@@ -165,8 +165,19 @@ Targeting the **Theme** Directory. `readme.txt` is the user-facing document;
 
 Ready: GPL-2.0, bundled OFL fonts with attribution, `screenshot.png` at exactly
 1200×900, `languages/*.pot`, `index.php`, no minified or third-party code, no
-plugin dependency, `phpcs.xml.dist` running `WPThemeReview`.
+page-builder dependency, `phpcs.xml.dist` running `WPThemeReview`.
 
-The theme must work on **stock WordPress with no plugins**. It does not depend on
-Elementor — Elementor is installed on both sites but unused, and a theme that
-required it could not be submitted at all.
+**Review house rules (enforced by `./scripts/package.sh`):**
+
+1. **Never claim `accessibility-ready`.** That tag is a *separate* review
+   queue and blocked a Theme Directory pass (2026-08). Keep skip-link/focus
+   CSS; do not put the tag on the `Tags:` line.
+2. **Theme URI optional.** If set, it must be the directory page
+   (`https://wordpress.org/themes/broadside/`). GitHub / product pages are
+   rejected. Omit until the theme is live, then set only that URL.
+3. Every Customizer setting must be read by the runtime — no orphan controls.
+
+The theme must work on **stock WordPress with no page builder**. It does not
+depend on Elementor — Elementor is installed on both sites but unused, and a
+theme that required it could not be submitted at all. Companion blocks are
+declared via `Requires Plugins: broadside-blocks` (Plugin Dependencies API).

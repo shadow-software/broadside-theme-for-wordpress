@@ -24,7 +24,7 @@ defined( 'ABSPATH' ) || exit;
  * Theme version. Kept in lockstep with the "Version:" header in style.css and
  * the "Stable tag:" in readme.txt. Used to bust asset caches on upgrade.
  */
-define( 'SHADOW_DIGEST_VERSION', '1.4.0' );
+define( 'SHADOW_DIGEST_VERSION', '1.4.1' );
 
 /**
  * Absolute path to the theme directory, with a trailing slash.
@@ -38,6 +38,7 @@ define( 'SHADOW_DIGEST_URL', trailingslashit( get_template_directory_uri() ) );
 
 require_once SHADOW_DIGEST_PATH . 'inc/setup.php';
 require_once SHADOW_DIGEST_PATH . 'inc/customizer.php';
+require_once SHADOW_DIGEST_PATH . 'inc/weather.php';
 require_once SHADOW_DIGEST_PATH . 'inc/template-tags.php';
 require_once SHADOW_DIGEST_PATH . 'inc/patterns.php';
 require_once SHADOW_DIGEST_PATH . 'inc/schema.php';
