@@ -3,10 +3,10 @@ Contributors: shadowsoftware
 Requires at least: 6.6
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 1.3.3
+Stable tag: 1.3.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
-Tags: news, blog, one-column, two-columns, three-columns, custom-colors, custom-logo, custom-menu, block-patterns, block-styles, editor-style, featured-images, full-site-editing, rtl-language-support, style-variations, template-editing, translation-ready, wide-blocks, accessibility-ready
+Tags: news, blog, one-column, two-columns, three-columns, custom-colors, custom-logo, custom-menu, block-patterns, block-styles, editor-style, featured-images, full-site-editing, rtl-language-support, style-variations, template-editing, translation-ready, wide-blocks
 
 A broadsheet block theme for news publications: blackletter masthead, folio rule, three-column lead grid, and the furniture a long read needs.
 
@@ -58,13 +58,15 @@ out of the way, because two competing graphs on one page is worse than none.
 
 = Accessibility =
 
-Broadside is built to the accessibility-ready guidelines: a working skip link, a
-visible focus style on every interactive element, correct heading order (the
-nameplate steps down from `h1` to `p` on any page where an article headline is
-the real `h1`), form labels on every input, `prefers-reduced-motion` honoured, and
-colour contrast that passes AA on the default palette. The Customizer will let you
-pick an accent that fails contrast — it is your publication — but the defaults do
-not.
+Broadside ships sensible defaults: a working skip link, a visible focus style on
+every interactive element, correct heading order (the nameplate steps down from
+`h1` to `p` on any page where an article headline is the real `h1`), form labels
+on every input, `prefers-reduced-motion` honoured, and colour contrast that
+passes AA on the default palette. The Customizer will let you pick an accent that
+fails contrast — it is your publication — but the defaults do not.
+
+This theme does **not** claim the WordPress.org `accessibility-ready` tag. That
+tag triggers a separate, longer review queue.
 
 == Installation ==
 
@@ -154,6 +156,10 @@ GPLv2 or later.
 
 == Upgrade Notice ==
 
+= 1.3.4 =
+Theme Directory review fixes: drop the accessibility-ready tag (separate a11y
+queue) and remove Theme URI (GitHub is not a valid Theme URI).
+
 = 1.3.3 =
 Fixes a grey band printed across the masthead on any site that has not chosen a
 masthead device. The band was the device's own ink, painted with nothing masked
@@ -191,6 +197,12 @@ The front page's lead photograph is no longer lazy-loaded. If you run Broadside 
 a site that is measured on Core Web Vitals, this release is worth taking.
 
 == Changelog ==
+
+= 1.3.4 =
+* Theme Directory review: remove the `accessibility-ready` tag so review is not
+  held for a separate accessibility queue. Keep skip-link and focus styles.
+* Remove Theme URI (was a GitHub URL — not about the theme on WordPress.org).
+* Customizer settings audited; every registered setting is still used at runtime.
 
 = 1.3.3 =
 * Fix: a solid grey band was printed across the masthead on every site with no

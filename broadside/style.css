@@ -1,6 +1,5 @@
 /*
 Theme Name: Broadside
-Theme URI: https://github.com/shadow-software/broadside-wordpress-theme
 Author: Shadow Software LLC
 Author URI: https://shadowsoftware.com/
 Description: A block theme for news publications and journals of record. Broadside dresses a modern WordPress site as a broadsheet newspaper: a blackletter masthead, a folio rule, a three-column lead grid, and a long-read article layout with editorial furniture — a short-answer box, key takeaways, a table of contents, an FAQ, and a sources list. Every colour, rule and section name is a Customizer setting, so one codebase can dress two mastheads without a single hard-coded brand.
@@ -8,11 +7,11 @@ Requires at least: 6.6
 Tested up to: 7.0
 Requires PHP: 8.0
 Requires Plugins: broadside-blocks
-Version: 1.3.3
+Version: 1.3.4
 License: GNU General Public License v2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain: broadside
-Tags: news, blog, one-column, two-columns, three-columns, custom-colors, custom-logo, custom-menu, block-patterns, block-styles, editor-style, featured-images, full-site-editing, rtl-language-support, style-variations, template-editing, translation-ready, wide-blocks, accessibility-ready
+Tags: news, blog, one-column, two-columns, three-columns, custom-colors, custom-logo, custom-menu, block-patterns, block-styles, editor-style, featured-images, full-site-editing, rtl-language-support, style-variations, template-editing, translation-ready, wide-blocks
 
 Broadside is free software distributed under the terms of the GNU General Public
 License version 2 or (at your option) any later version. A copy of the licence
