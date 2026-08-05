@@ -175,6 +175,16 @@ function shadow_digest_render_colophon(): string {
 	$year    = (int) wp_date( 'Y' );
 	$host    = (string) wp_parse_url( home_url(), PHP_URL_HOST );
 
+	$podcast_url   = '';
+	$podcast_label = __( 'Podcast', 'broadside-blocks' );
+	if ( function_exists( 'shadow_digest_get' ) ) {
+		$podcast_url = (string) shadow_digest_get( 'shadow_digest_podcast_directory_url' );
+		$label_mod   = (string) shadow_digest_get( 'shadow_digest_podcast_directory_label' );
+		if ( '' !== $label_mod ) {
+			$podcast_label = $label_mod;
+		}
+	}
+
 	ob_start();
 	?>
 	<footer <?php echo wp_kses_data( get_block_wrapper_attributes( array( 'class' => 'digest-footer' ) ) ); ?>>
@@ -207,6 +217,17 @@ function shadow_digest_render_colophon(): string {
 			}
 			?>
 		</span>
+
+		<?php if ( $podcast_url ) : ?>
+		<span class="digest-footer__podcast">
+			<a
+				class="digest-footer__podcast-link"
+				href="<?php echo esc_url( $podcast_url ); ?>"
+				target="_blank"
+				rel="noopener noreferrer"
+			><?php echo esc_html( $podcast_label ); ?></a>
+		</span>
+		<?php endif; ?>
 
 		<span class="digest-footer__copyright">
 			<?php

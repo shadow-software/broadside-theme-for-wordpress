@@ -375,6 +375,26 @@ check( str_contains( $html, 'digest-podcast__player' ), 'canary article renders 
 check( str_contains( $html, 'episode-121-10.mp3' ), 'player src is the seeded podcast_audio_url' );
 check( str_contains( $html, 'rel="alternate" type="application/rss+xml"' ) && str_contains( $html, '/feed/podcast/' ), 'article <head> advertises the podcast feed' );
 
+// Public directory (Podcast Index) — footer whenever theme mod is set (local-seed).
+$home = get( $base . '/' );
+check( 200 === $home['code'], 'home returns HTTP 200 for podcast directory assert', "got {$home['code']}" );
+check( str_contains( $home['body'], 'digest-footer__podcast-link' ), 'footer has podcast directory link' );
+check(
+	(bool) preg_match(
+		'#class="digest-footer__podcast-link"[^>]*href="https://podcastindex\.org/podcast/7981845"[^>]*target="_blank"#',
+		$home['body']
+	) || (bool) preg_match(
+		'#href="https://podcastindex\.org/podcast/7981845"[^>]*class="digest-footer__podcast-link"[^>]*target="_blank"#',
+		$home['body']
+	) || (
+		str_contains( $home['body'], 'podcastindex.org/podcast/7981845' )
+		&& str_contains( $home['body'], 'digest-footer__podcast-link' )
+		&& str_contains( $home['body'], 'target="_blank"' )
+	),
+	'footer podcast link is Podcast Index + new tab'
+);
+check( str_contains( $home['body'], 'noopener' ), 'external podcast link has noopener' );
+
 echo "\n";
 echo str_repeat( '─', 70 ) . "\n";
 

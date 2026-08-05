@@ -159,6 +159,8 @@ $mods = array(
 	'shadow_digest_podcast_owner_email' => 'inquiries@marksmansdigest.com',
 	'shadow_digest_podcast_category' => 'News',
 	'shadow_digest_podcast_player_label' => 'Listen',
+	'shadow_digest_podcast_directory_url' => 'https://podcastindex.org/podcast/7981845',
+	'shadow_digest_podcast_directory_label' => 'Podcast',
 );
 
 foreach ( $mods as $k => $v ) {

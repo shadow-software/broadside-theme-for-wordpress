@@ -515,6 +515,25 @@ function shadow_digest_settings(): array {
 			'transport' => 'postMessage',
 		),
 
+		'shadow_digest_podcast_directory_url'   => array(
+			'default'  => '',
+			'sanitize' => 'esc_url_raw',
+			'type'     => 'url',
+			'section'  => 'shadow_digest_podcast',
+			'label'    => __( 'Public directory URL', 'broadside' ),
+			'help'     => __( 'Apple / Spotify / Podcast Index page. Shown in the section nav and footer; opens in a new tab. Leave empty to hide.', 'broadside' ),
+		),
+
+		'shadow_digest_podcast_directory_label' => array(
+			'default'   => __( 'Podcast', 'broadside' ),
+			'sanitize'  => 'sanitize_text_field',
+			'type'      => 'text',
+			'section'   => 'shadow_digest_podcast',
+			'label'     => __( 'Directory link label', 'broadside' ),
+			'help'      => __( 'Nav and footer label for the public directory URL.', 'broadside' ),
+			'transport' => 'postMessage',
+		),
+
 		/*
 		 * ----------------------------------------------------------------
 		 * Article furniture.
