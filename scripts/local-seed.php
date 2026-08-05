@@ -156,7 +156,7 @@ $mods = array(
 	'shadow_digest_podcast_summary' => 'Narrated features for the American marksman.',
 	'shadow_digest_podcast_author' => "Marksman's Digest",
 	'shadow_digest_podcast_owner_name' => 'Shadow Software',
-	'shadow_digest_podcast_owner_email' => 'podcast@marksmansdigest.com',
+	'shadow_digest_podcast_owner_email' => 'inquiries@marksmansdigest.com',
 	'shadow_digest_podcast_category' => 'News',
 	'shadow_digest_podcast_player_label' => 'Listen',
 );
