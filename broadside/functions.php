@@ -24,7 +24,7 @@ defined( 'ABSPATH' ) || exit;
  * Theme version. Kept in lockstep with the "Version:" header in style.css and
  * the "Stable tag:" in readme.txt. Used to bust asset caches on upgrade.
  */
-define( 'SHADOW_DIGEST_VERSION', '1.4.2' );
+define( 'SHADOW_DIGEST_VERSION', '1.4.3' );
 
 /**
  * Absolute path to the theme directory, with a trailing slash.

@@ -387,6 +387,11 @@ check(
 		&& $pos_listen < $pos_audio && $pos_audio < $pos_watch && $pos_watch < $pos_video,
 	'podcast blocks order: Listen → audio → Watch → video'
 );
+// Spacing: with embeds present, hide byline bottom rule + collapse body offset.
+$css_path = dirname( __DIR__ ) . '/broadside/assets/css/digest.css';
+$css      = is_readable( $css_path ) ? (string) file_get_contents( $css_path ) : '';
+check( str_contains( $css, '.digest-single:has(.digest-podcast) .digest-byline-block' ), 'CSS removes byline bottom rule when podcast embeds present' );
+check( str_contains( $css, '.digest-single:has(.digest-podcast) .digest-article__header + .digest-prose' ), 'CSS collapses prose offset when podcast embeds present' );
 check( str_contains( $html, 'rel="alternate" type="application/rss+xml"' ) && str_contains( $html, '/feed/podcast/' ), 'article <head> advertises the podcast feed' );
 
 // Public directory (Podcast Index) — footer whenever theme mod is set (local-seed).

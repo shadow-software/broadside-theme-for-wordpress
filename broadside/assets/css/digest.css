@@ -3413,6 +3413,25 @@ body:is(.woocommerce, .woocommerce-page) :is(input, textarea, select):focus,
 	background: color-mix(in srgb, var(--digest-paper-shade, #e7dfce) 55%, var(--digest-paper, #f4efe4));
 }
 
+/*
+ * Articles with 1+ podcast embeds: hang the player card flush under the byline.
+ * Without this, the byline's bottom rule + header bottom pad + prose top margin
+ * read as a lonely HR with a hollow band under it before the card — noise.
+ * Posts without embeds keep the normal byline rule and body spacing.
+ */
+.digest-single:has(.digest-podcast) .digest-byline-block {
+	border-bottom: 0;
+}
+
+.digest-single:has(.digest-podcast) .digest-article__header {
+	padding-bottom: 0;
+}
+
+.digest-single:has(.digest-podcast) .digest-article__header + .digest-prose {
+	margin-top: 0;
+	margin-block-start: 0;
+}
+
 .digest-podcast__label {
 	margin: 0 0 0.55rem;
 	font-family: var(--digest-font-ui, inherit);
