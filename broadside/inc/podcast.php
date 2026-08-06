@@ -1,14 +1,19 @@
 <?php
 /**
- * Podcast RSS feed + on-article audio player.
+ * Podcast RSS feed + on-article audio/video player.
  *
  * Episodes are ordinary posts that carry `podcast_audio_url` (and optional
  * `podcast_media_id` / `podcast_bytes` / `podcast_duration`) post meta — written
- * by the n8n Cannabis Digest and Marksman Digest podcast generators. This file:
+ * by the n8n Cannabis Digest and Marksman Digest podcast generators. Phase 2
+ * (issue #26) also writes video companions:
+ * `podcast_video_url` / `podcast_video_media_id` / `podcast_video_bytes` /
+ * `podcast_youtube_url`.
+ *
+ * This file:
  *
  *   1. Registers those meta keys for the REST API (so n8n can write them).
  *   2. Serves an iTunes-/Spotify-/Google-compatible feed at /feed/podcast/.
- *   3. Prepends a native <audio> player on single posts that have audio.
+ *   3. Prepends a native <audio> player (and optional <video>) on single posts.
  *
  * No do_blocks() / apply_filters( 'the_content' ) recursion — the player HTML is
  * a static string prepended to $content. See docs/INCIDENT-2026-07-13-vps-outage.md.
@@ -29,6 +34,12 @@ const SHADOW_DIGEST_PODCAST_META_MEDIA_ID = 'podcast_media_id';
 const SHADOW_DIGEST_PODCAST_META_BYTES    = 'podcast_bytes';
 const SHADOW_DIGEST_PODCAST_META_DURATION = 'podcast_duration';
 
+/** Phase 2 — captioned episode video (WP media; optional YouTube URL later). */
+const SHADOW_DIGEST_PODCAST_META_VIDEO_URL      = 'podcast_video_url';
+const SHADOW_DIGEST_PODCAST_META_VIDEO_MEDIA_ID = 'podcast_video_media_id';
+const SHADOW_DIGEST_PODCAST_META_VIDEO_BYTES    = 'podcast_video_bytes';
+const SHADOW_DIGEST_PODCAST_META_YOUTUBE_URL    = 'podcast_youtube_url';
+
 /**
  * Register podcast post meta for REST writes from n8n.
  *
@@ -37,10 +48,20 @@ const SHADOW_DIGEST_PODCAST_META_DURATION = 'podcast_duration';
  */
 function shadow_digest_register_podcast_meta(): void {
 	$keys = array(
-		SHADOW_DIGEST_PODCAST_META_URL      => 'string',
-		SHADOW_DIGEST_PODCAST_META_MEDIA_ID => 'integer',
-		SHADOW_DIGEST_PODCAST_META_BYTES    => 'integer',
-		SHADOW_DIGEST_PODCAST_META_DURATION => 'string',
+		SHADOW_DIGEST_PODCAST_META_URL            => 'string',
+		SHADOW_DIGEST_PODCAST_META_MEDIA_ID       => 'integer',
+		SHADOW_DIGEST_PODCAST_META_BYTES          => 'integer',
+		SHADOW_DIGEST_PODCAST_META_DURATION       => 'string',
+		SHADOW_DIGEST_PODCAST_META_VIDEO_URL      => 'string',
+		SHADOW_DIGEST_PODCAST_META_VIDEO_MEDIA_ID => 'integer',
+		SHADOW_DIGEST_PODCAST_META_VIDEO_BYTES    => 'integer',
+		SHADOW_DIGEST_PODCAST_META_YOUTUBE_URL    => 'string',
+	);
+
+	$url_keys = array(
+		SHADOW_DIGEST_PODCAST_META_URL,
+		SHADOW_DIGEST_PODCAST_META_VIDEO_URL,
+		SHADOW_DIGEST_PODCAST_META_YOUTUBE_URL,
 	);
 
 	foreach ( $keys as $key => $type ) {
@@ -54,11 +75,11 @@ function shadow_digest_register_podcast_meta(): void {
 				'auth_callback'     => static function (): bool {
 					return current_user_can( 'edit_posts' );
 				},
-				'sanitize_callback' => static function ( $value ) use ( $key, $type ) {
+				'sanitize_callback' => static function ( $value ) use ( $key, $type, $url_keys ) {
 					if ( 'integer' === $type ) {
 						return (int) $value;
 					}
-					if ( SHADOW_DIGEST_PODCAST_META_URL === $key ) {
+					if ( in_array( $key, $url_keys, true ) ) {
 						return esc_url_raw( (string) $value );
 					}
 					return sanitize_text_field( (string) $value );
@@ -322,7 +343,8 @@ function shadow_digest_render_podcast_feed(): void {
 }
 
 /**
- * Prepend a native audio player on single posts that have podcast audio.
+ * Prepend a native audio (and optional video) player on single posts that have
+ * podcast media meta.
  *
  * @since 1.4.0
  * @param string $content Post content HTML.
@@ -342,12 +364,28 @@ function shadow_digest_podcast_player_content( string $content ): string {
 	}
 
 	$audio = (string) get_post_meta( $post_id, SHADOW_DIGEST_PODCAST_META_URL, true );
-	if ( '' === $audio || ! wp_http_validate_url( $audio ) ) {
+	if ( '' !== $audio && ! wp_http_validate_url( $audio ) ) {
+		$audio = '';
+	}
+
+	$video = (string) get_post_meta( $post_id, SHADOW_DIGEST_PODCAST_META_VIDEO_URL, true );
+	if ( '' !== $video && ! wp_http_validate_url( $video ) ) {
+		$video = '';
+	}
+
+	// Prefer hosted MP4; optional YouTube is a text link only (no oEmbed — keep
+	// the content filter free of network side-effects).
+	$youtube = (string) get_post_meta( $post_id, SHADOW_DIGEST_PODCAST_META_YOUTUBE_URL, true );
+	if ( '' !== $youtube && ! wp_http_validate_url( $youtube ) ) {
+		$youtube = '';
+	}
+
+	if ( '' === $audio && '' === $video ) {
 		return $content;
 	}
 
 	// Idempotent: do not double-inject if content already carries our player.
-	if ( str_contains( $content, 'digest-podcast__player' ) ) {
+	if ( str_contains( $content, 'digest-podcast__player' ) || str_contains( $content, 'digest-podcast__video' ) ) {
 		return $content;
 	}
 
@@ -355,12 +393,34 @@ function shadow_digest_podcast_player_content( string $content ): string {
 	if ( '' === $label ) {
 		$label = __( 'Listen', 'broadside' );
 	}
+	// When video is present, surface both modalities in the figure label.
+	if ( '' !== $video && ! str_contains( strtolower( $label ), 'watch' ) ) {
+		/* translators: %s: existing listen label (e.g. "Listen") */
+		$label = sprintf( __( '%s · Watch', 'broadside' ), $label );
+	}
 
 	$player  = '<figure class="digest-podcast">';
 	$player .= '<figcaption class="digest-podcast__label">' . esc_html( $label ) . '</figcaption>';
-	$player .= '<audio class="digest-podcast__player" controls preload="metadata" src="' . esc_url( $audio ) . '">';
-	$player .= esc_html__( 'Your browser does not support the audio element.', 'broadside' );
-	$player .= '</audio></figure>';
+
+	if ( '' !== $video ) {
+		$player .= '<video class="digest-podcast__video" controls playsinline preload="metadata" src="' . esc_url( $video ) . '">';
+		$player .= esc_html__( 'Your browser does not support the video element.', 'broadside' );
+		$player .= '</video>';
+	}
+
+	if ( '' !== $audio ) {
+		$player .= '<audio class="digest-podcast__player" controls preload="metadata" src="' . esc_url( $audio ) . '">';
+		$player .= esc_html__( 'Your browser does not support the audio element.', 'broadside' );
+		$player .= '</audio>';
+	}
+
+	if ( '' !== $youtube ) {
+		$player .= '<p class="digest-podcast__youtube"><a class="digest-podcast__youtube-link" href="' . esc_url( $youtube ) . '" target="_blank" rel="noopener noreferrer">';
+		$player .= esc_html__( 'Watch on YouTube', 'broadside' );
+		$player .= '</a></p>';
+	}
+
+	$player .= '</figure>';
 
 	return $player . $content;
 }

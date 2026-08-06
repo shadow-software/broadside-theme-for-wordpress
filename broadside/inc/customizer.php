@@ -426,7 +426,7 @@ function shadow_digest_settings(): array {
 			'type'     => 'checkbox',
 			'section'  => 'shadow_digest_podcast',
 			'label'    => __( 'Enable podcast feed + player', 'broadside' ),
-			'help'     => __( 'Serves /feed/podcast/ for Apple, Spotify and Google, and shows an audio player on posts that have a podcast_audio_url.', 'broadside' ),
+			'help'     => __( 'Serves /feed/podcast/ for Apple, Spotify and Google, and shows an audio/video player on posts that have a podcast_audio_url (and optional podcast_video_url).', 'broadside' ),
 		),
 
 		'shadow_digest_podcast_title'           => array(
@@ -681,7 +681,7 @@ function shadow_digest_customize_register( WP_Customize_Manager $wp_customize ):
 		),
 		'shadow_digest_podcast'    => array(
 			'title'       => __( 'Podcast', 'broadside' ),
-			'description' => __( 'Optional narrated-audio companion. Posts with a podcast_audio_url appear in /feed/podcast/ and get an on-article player.', 'broadside' ),
+			'description' => __( 'Optional narrated-audio companion. Posts with a podcast_audio_url appear in /feed/podcast/ and get an on-article player. Posts with podcast_video_url also show the captioned episode video.', 'broadside' ),
 		),
 		'shadow_digest_article'    => array(
 			'title'       => __( 'Article furniture', 'broadside' ),

@@ -99,11 +99,17 @@ $canary = wp_insert_post(
 echo "  canary post: {$canary} (contains digest/toc + headings — the recursion path)\n";
 
 // Podcast meta — exercises /feed/podcast/ and the on-article player. Uses a real
-// production MP3 so the enclosure URL is valid HTTPS audio/mpeg.
+// production MP3 so the enclosure URL is valid HTTPS audio/mpeg. Phase 2 video
+// uses a short public sample MP4 so assertions can verify the video element
+// without depending on a full episode encode.
 if ( $canary && ! is_wp_error( $canary ) ) {
 	update_post_meta( (int) $canary, 'podcast_audio_url', 'https://marksmansdigest.com/wp-content/uploads/2026/07/episode-121-10.mp3' );
 	update_post_meta( (int) $canary, 'podcast_bytes', 4500000 );
 	update_post_meta( (int) $canary, 'podcast_duration', '18:30' );
+	// Sample 1280x720 clip (commonly used HTTPS test asset). Local assert only
+	// checks class + src presence; the CDN need not match production encode.
+	update_post_meta( (int) $canary, 'podcast_video_url', 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4' );
+	update_post_meta( (int) $canary, 'podcast_video_bytes', 12000000 );
 }
 
 // A few more so the front page grid, the briefs rail and the related block have

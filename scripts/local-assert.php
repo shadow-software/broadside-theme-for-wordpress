@@ -373,6 +373,9 @@ check( str_contains( $feed['body'], 'inquiries@marksmansdigest.com' ), 'owner em
 
 check( str_contains( $html, 'digest-podcast__player' ), 'canary article renders the audio player' );
 check( str_contains( $html, 'episode-121-10.mp3' ), 'player src is the seeded podcast_audio_url' );
+check( str_contains( $html, 'digest-podcast__video' ), 'canary article renders the Phase 2 video player' );
+check( str_contains( $html, 'View_From_A_Blue_Moon_Trailer-720p.mp4' ), 'video src is the seeded podcast_video_url' );
+check( str_contains( $html, 'Listen · Watch' ) || str_contains( $html, 'Watch' ), 'figure label surfaces Watch when video is present' );
 check( str_contains( $html, 'rel="alternate" type="application/rss+xml"' ) && str_contains( $html, '/feed/podcast/' ), 'article <head> advertises the podcast feed' );
 
 // Public directory (Podcast Index) — footer whenever theme mod is set (local-seed).

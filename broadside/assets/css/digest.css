@@ -3403,7 +3403,7 @@ body:is(.woocommerce, .woocommerce-page) :is(input, textarea, select):focus,
 }
 
 /* ------------------------------------------------------------------ */
-/* Podcast player — prepended on single posts with podcast_audio_url  */
+/* Podcast player — audio + optional Phase 2 video (podcast_* meta)   */
 /* ------------------------------------------------------------------ */
 
 .digest-podcast {
@@ -3423,8 +3423,36 @@ body:is(.woocommerce, .woocommerce-page) :is(input, textarea, select):focus,
 	color: var(--digest-ink, #1c1a17);
 }
 
+.digest-podcast__video {
+	display: block;
+	width: 100%;
+	height: auto;
+	max-height: min(70vh, 720px);
+	margin: 0 0 0.75rem;
+	background: #0c0c0e;
+	aspect-ratio: 16 / 9;
+	object-fit: contain;
+}
+
 .digest-podcast__player {
 	display: block;
 	width: 100%;
 	height: 2.5rem;
+}
+
+.digest-podcast__youtube {
+	margin: 0.65rem 0 0;
+	font-family: var(--digest-font-ui, inherit);
+	font-size: 0.85rem;
+}
+
+.digest-podcast__youtube-link {
+	color: var(--digest-ink, #1c1a17);
+	text-decoration: underline;
+	text-underline-offset: 0.15em;
+}
+
+.digest-podcast__youtube-link:hover,
+.digest-podcast__youtube-link:focus-visible {
+	color: var(--digest-accent-soft, #c99a5b);
 }
