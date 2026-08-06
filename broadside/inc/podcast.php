@@ -389,29 +389,28 @@ function shadow_digest_podcast_player_content( string $content ): string {
 		return $content;
 	}
 
-	$label = (string) shadow_digest_get( 'shadow_digest_podcast_player_label' );
-	if ( '' === $label ) {
-		$label = __( 'Listen', 'broadside' );
-	}
-	// When video is present, surface both modalities in the figure label.
-	if ( '' !== $video && ! str_contains( strtolower( $label ), 'watch' ) ) {
-		/* translators: %s: existing listen label (e.g. "Listen") */
-		$label = sprintf( __( '%s · Watch', 'broadside' ), $label );
-	}
-
-	$player  = '<figure class="digest-podcast">';
-	$player .= '<figcaption class="digest-podcast__label">' . esc_html( $label ) . '</figcaption>';
-
-	if ( '' !== $video ) {
-		$player .= '<video class="digest-podcast__video" controls playsinline preload="metadata" src="' . esc_url( $video ) . '">';
-		$player .= esc_html__( 'Your browser does not support the video element.', 'broadside' );
-		$player .= '</video>';
-	}
+	// Section structure (keyword clarity + scan hierarchy):
+	//   Listen to the podcast → <audio>
+	//   Watch the video      → <video>
+	// Optional YouTube follows video.
+	$player = '<figure class="digest-podcast">';
 
 	if ( '' !== $audio ) {
+		$player .= '<figcaption class="digest-podcast__label digest-podcast__label--audio">';
+		$player .= esc_html__( 'Listen to the podcast', 'broadside' );
+		$player .= '</figcaption>';
 		$player .= '<audio class="digest-podcast__player" controls preload="metadata" src="' . esc_url( $audio ) . '">';
 		$player .= esc_html__( 'Your browser does not support the audio element.', 'broadside' );
 		$player .= '</audio>';
+	}
+
+	if ( '' !== $video ) {
+		$player .= '<figcaption class="digest-podcast__label digest-podcast__label--video">';
+		$player .= esc_html__( 'Watch the video', 'broadside' );
+		$player .= '</figcaption>';
+		$player .= '<video class="digest-podcast__video" controls playsinline preload="metadata" src="' . esc_url( $video ) . '">';
+		$player .= esc_html__( 'Your browser does not support the video element.', 'broadside' );
+		$player .= '</video>';
 	}
 
 	if ( '' !== $youtube ) {

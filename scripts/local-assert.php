@@ -375,7 +375,18 @@ check( str_contains( $html, 'digest-podcast__player' ), 'canary article renders 
 check( str_contains( $html, 'episode-121-10.mp3' ), 'player src is the seeded podcast_audio_url' );
 check( str_contains( $html, 'digest-podcast__video' ), 'canary article renders the Phase 2 video player' );
 check( str_contains( $html, 'View_From_A_Blue_Moon_Trailer-720p.mp4' ), 'video src is the seeded podcast_video_url' );
-check( str_contains( $html, 'Listen · Watch' ) || str_contains( $html, 'Watch' ), 'figure label surfaces Watch when video is present' );
+check( str_contains( $html, 'Listen to the podcast' ), 'audio section labelled Listen to the podcast' );
+check( str_contains( $html, 'Watch the video' ), 'video section labelled Watch the video' );
+// Order: listen/audio before watch/video.
+$pos_listen = strpos( $html, 'Listen to the podcast' );
+$pos_audio  = strpos( $html, 'digest-podcast__player' );
+$pos_watch  = strpos( $html, 'Watch the video' );
+$pos_video  = strpos( $html, 'digest-podcast__video' );
+check(
+	false !== $pos_listen && false !== $pos_audio && false !== $pos_watch && false !== $pos_video
+		&& $pos_listen < $pos_audio && $pos_audio < $pos_watch && $pos_watch < $pos_video,
+	'podcast blocks order: Listen → audio → Watch → video'
+);
 check( str_contains( $html, 'rel="alternate" type="application/rss+xml"' ) && str_contains( $html, '/feed/podcast/' ), 'article <head> advertises the podcast feed' );
 
 // Public directory (Podcast Index) — footer whenever theme mod is set (local-seed).

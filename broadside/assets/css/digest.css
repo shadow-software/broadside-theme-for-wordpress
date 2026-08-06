@@ -3423,12 +3423,17 @@ body:is(.woocommerce, .woocommerce-page) :is(input, textarea, select):focus,
 	color: var(--digest-ink, #1c1a17);
 }
 
+/* Video section sits below audio with clear separation. */
+.digest-podcast__label--video {
+	margin-top: 1.15rem;
+}
+
 .digest-podcast__video {
 	display: block;
 	width: 100%;
 	height: auto;
 	max-height: min(70vh, 720px);
-	margin: 0 0 0.75rem;
+	margin: 0 0 0.5rem;
 	background: #0c0c0e;
 	aspect-ratio: 16 / 9;
 	object-fit: contain;
@@ -3438,6 +3443,7 @@ body:is(.woocommerce, .woocommerce-page) :is(input, textarea, select):focus,
 	display: block;
 	width: 100%;
 	height: 2.5rem;
+	margin: 0 0 0.25rem;
 }
 
 .digest-podcast__youtube {
