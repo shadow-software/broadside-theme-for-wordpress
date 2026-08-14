@@ -25,7 +25,7 @@ jobs:
     name: No content rendering in render callbacks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: shivammathur/setup-php@v2
         with:
@@ -63,7 +63,7 @@ jobs:
       matrix:
         php: [ '8.0', '8.3', '8.5' ]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: shivammathur/setup-php@v2
         with:
@@ -89,7 +89,7 @@ jobs:
     name: WordPress Coding Standards + Theme Review
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: shivammathur/setup-php@v2
         with:
@@ -120,7 +120,7 @@ jobs:
     name: Theme Directory requirements
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # package.sh --check runs the PHP content-render guard over the staged
       # package, so this job needs a PHP binary even though it lints no PHP.
@@ -184,7 +184,7 @@ jobs:
     name: Render the theme and assert correctness
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: shivammathur/setup-php@v2
         with:
