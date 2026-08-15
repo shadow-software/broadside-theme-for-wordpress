@@ -150,10 +150,10 @@ function shadow_digest_weather_resolve_coords( string $city, ?float $lat, ?float
 
 	$url = add_query_arg(
 		array(
-			'name'  => $city,
-			'count' => 1,
+			'name'     => $city,
+			'count'    => 1,
 			'language' => 'en',
-			'format' => 'json',
+			'format'   => 'json',
 		),
 		'https://geocoding-api.open-meteo.com/v1/search'
 	);
@@ -215,11 +215,11 @@ function shadow_digest_weather_resolve_units( string $unit, float $lon ): string
  */
 function shadow_digest_weather_fetch( float $lat, float $lon, string $units ): ?array {
 	$args = array(
-		'latitude'  => $lat,
-		'longitude' => $lon,
-		'current'   => 'temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m',
-		'daily'     => 'weather_code,temperature_2m_max,temperature_2m_min',
-		'timezone'  => 'auto',
+		'latitude'      => $lat,
+		'longitude'     => $lon,
+		'current'       => 'temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,wind_direction_10m',
+		'daily'         => 'weather_code,temperature_2m_max,temperature_2m_min',
+		'timezone'      => 'auto',
 		'forecast_days' => 1,
 	);
 

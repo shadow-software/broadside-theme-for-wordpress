@@ -325,7 +325,7 @@ add_filter( 'woocommerce_get_image_size_gallery_thumbnail', 'shadow_digest_wooco
  * @return string Empty for WooCommerce's account block; the content untouched otherwise.
  */
 function shadow_digest_drop_woo_account_block( string $block_content, array $block ): string {
-	if ( ( $block['blockName'] ?? '' ) === 'woocommerce/customer-account' ) {
+	if ( 'woocommerce/customer-account' === ( $block['blockName'] ?? '' ) ) {
 		return '';
 	}
 

@@ -3,7 +3,7 @@ Contributors: shadowsoftware
 Requires at least: 7.0
 Tested up to: 7.0
 Requires PHP: 8.2
-Stable tag: 1.4.1
+Stable tag: 1.4.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Tags: news, blog, one-column, two-columns, three-columns, custom-colors, custom-logo, custom-menu, block-patterns, block-styles, editor-style, featured-images, full-site-editing, rtl-language-support, style-variations, template-editing, translation-ready, wide-blocks
@@ -193,6 +193,15 @@ The front page's lead photograph is no longer lazy-loaded. If you run Broadside 
 a site that is measured on Core Web Vitals, this release is worth taking.
 
 == Changelog ==
+
+= 1.4.3 =
+* Podcast embeds now hang directly under the byline instead of being pushed down
+  by the folio rule, so an audio article opens on the player rather than on a gap.
+* Minimum supported WordPress raised to 7.0 and PHP to 8.2.
+
+= 1.4.2 =
+* Podcast Index directory links in the nav chrome and the footer, with Customizer
+  settings to set or hide them.
 
 = 1.4.1 =
 * The left masthead ear can now show a live local forecast for the publication's
