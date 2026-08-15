@@ -152,21 +152,21 @@ function shadow_digest_settings(): array {
 		),
 
 		'shadow_digest_weather_lat'             => array(
-			'default'   => '',
-			'sanitize'  => 'shadow_digest_sanitize_coord',
-			'type'      => 'text',
-			'section'   => 'shadow_digest_masthead',
-			'label'     => __( 'Weather latitude', 'broadside' ),
-			'help'      => __( 'Optional. With longitude, skips geocoding — useful when the city of record is a region (e.g. Montana → Helena).', 'broadside' ),
+			'default'  => '',
+			'sanitize' => 'shadow_digest_sanitize_coord',
+			'type'     => 'text',
+			'section'  => 'shadow_digest_masthead',
+			'label'    => __( 'Weather latitude', 'broadside' ),
+			'help'     => __( 'Optional. With longitude, skips geocoding — useful when the city of record is a region (e.g. Montana → Helena).', 'broadside' ),
 		),
 
 		'shadow_digest_weather_lon'             => array(
-			'default'   => '',
-			'sanitize'  => 'shadow_digest_sanitize_coord',
-			'type'      => 'text',
-			'section'   => 'shadow_digest_masthead',
-			'label'     => __( 'Weather longitude', 'broadside' ),
-			'help'      => __( 'Optional. Pair with latitude.', 'broadside' ),
+			'default'  => '',
+			'sanitize' => 'shadow_digest_sanitize_coord',
+			'type'     => 'text',
+			'section'  => 'shadow_digest_masthead',
+			'label'    => __( 'Weather longitude', 'broadside' ),
+			'help'     => __( 'Optional. Pair with latitude.', 'broadside' ),
 		),
 
 		'shadow_digest_weather_units'           => array(

@@ -42,6 +42,22 @@
 	</rule>
 
 	<!--
+		The podcast feed is XML, not HTML, so its text nodes are escaped with
+		shadow_digest_podcast_xml_text() — htmlspecialchars() under ENT_XML1 |
+		ENT_QUOTES. WPCS only knows core's escapers, so every echo in the feed
+		read as unescaped output (19 errors). Declaring the function here is the
+		correct fix: swapping it for esc_html() would escape for the wrong
+		grammar and produce an RSS feed with HTML entities in it.
+	-->
+	<rule ref="WordPress.Security.EscapeOutput">
+		<properties>
+			<property name="customEscapingFunctions" type="array">
+				<element value="shadow_digest_podcast_xml_text"/>
+			</property>
+		</properties>
+	</rule>
+
+	<!--
 		Text domain enforcement: every translatable string in the theme must use
 		the theme's own text domain, which must match the directory name. The
 		Theme Directory rejects a mismatch outright.

@@ -267,20 +267,20 @@ function shadow_digest_render_podcast_feed(): void {
 	<itunes:explicit><?php echo shadow_digest_podcast_xml_text( $explicit ); ?></itunes:explicit>
 	<itunes:owner>
 		<itunes:name><?php echo shadow_digest_podcast_xml_text( $owner_name ); ?></itunes:name>
-<?php if ( $owner_email ) : ?>
+	<?php if ( $owner_email ) : ?>
 		<itunes:email><?php echo shadow_digest_podcast_xml_text( $owner_email ); ?></itunes:email>
-<?php endif; ?>
+	<?php endif; ?>
 	</itunes:owner>
-<?php if ( $artwork ) : ?>
+	<?php if ( $artwork ) : ?>
 	<itunes:image href="<?php echo esc_url( $artwork ); ?>" />
 	<image>
 		<url><?php echo esc_url( $artwork ); ?></url>
 		<title><?php echo shadow_digest_podcast_xml_text( $title ); ?></title>
 		<link><?php echo esc_url( $site_url ); ?></link>
 	</image>
-<?php endif; ?>
+	<?php endif; ?>
 	<itunes:category text="<?php echo shadow_digest_podcast_xml_text( $category ); ?>" />
-<?php
+	<?php
 	foreach ( $episodes as $post ) {
 		$audio = (string) get_post_meta( $post->ID, SHADOW_DIGEST_PODCAST_META_URL, true );
 		if ( '' === $audio ) {
@@ -326,14 +326,14 @@ function shadow_digest_render_podcast_feed(): void {
 		<itunes:author><?php echo shadow_digest_podcast_xml_text( $author ); ?></itunes:author>
 		<itunes:summary><?php echo shadow_digest_podcast_xml_text( wp_strip_all_tags( $excerpt ) ); ?></itunes:summary>
 		<itunes:explicit><?php echo shadow_digest_podcast_xml_text( $explicit ); ?></itunes:explicit>
-<?php if ( $duration ) : ?>
+		<?php if ( $duration ) : ?>
 		<itunes:duration><?php echo shadow_digest_podcast_xml_text( $duration ); ?></itunes:duration>
-<?php endif; ?>
-<?php if ( $artwork ) : ?>
+		<?php endif; ?>
+		<?php if ( $artwork ) : ?>
 		<itunes:image href="<?php echo esc_url( $artwork ); ?>" />
-<?php endif; ?>
+		<?php endif; ?>
 	</item>
-<?php
+		<?php
 	}
 	?>
 </channel>
@@ -390,8 +390,8 @@ function shadow_digest_podcast_player_content( string $content ): string {
 	}
 
 	// Section structure (keyword clarity + scan hierarchy):
-	//   Listen to the podcast → <audio>
-	//   Watch the video      → <video>
+	// Listen to the podcast → <audio>
+	// Watch the video      → <video>
 	// Optional YouTube follows video.
 	$player = '<figure class="digest-podcast">';
 

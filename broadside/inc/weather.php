@@ -104,7 +104,7 @@ function shadow_digest_weather_forecast(): ?array {
 		return null;
 	}
 
-	$formatted = shadow_digest_weather_format( $data, $city !== '' ? $city : $coords['name'], $units );
+	$formatted = shadow_digest_weather_format( $data, '' !== $city ? $city : $coords['name'], $units );
 	set_transient( $cache_key, $formatted, SHADOW_DIGEST_WEATHER_TTL );
 
 	return $formatted;
@@ -260,11 +260,11 @@ function shadow_digest_weather_fetch( float $lat, float $lon, string $units ): ?
  * @return array{title: string, body: string}
  */
 function shadow_digest_weather_format( array $data, string $city, string $units ): array {
-	$current = is_array( $data['current'] ) ? $data['current'] : array();
-	$code    = isset( $current['weather_code'] ) ? (int) $current['weather_code'] : 0;
-	$temp    = isset( $current['temperature_2m'] ) ? (float) $current['temperature_2m'] : 0.0;
-	$humid   = isset( $current['relative_humidity_2m'] ) ? (int) $current['relative_humidity_2m'] : 0;
-	$wind    = isset( $current['wind_speed_10m'] ) ? (float) $current['wind_speed_10m'] : 0.0;
+	$current  = is_array( $data['current'] ) ? $data['current'] : array();
+	$code     = isset( $current['weather_code'] ) ? (int) $current['weather_code'] : 0;
+	$temp     = isset( $current['temperature_2m'] ) ? (float) $current['temperature_2m'] : 0.0;
+	$humid    = isset( $current['relative_humidity_2m'] ) ? (int) $current['relative_humidity_2m'] : 0;
+	$wind     = isset( $current['wind_speed_10m'] ) ? (float) $current['wind_speed_10m'] : 0.0;
 	$wind_dir = isset( $current['wind_direction_10m'] ) ? (float) $current['wind_direction_10m'] : 0.0;
 
 	$high = null;
@@ -278,9 +278,9 @@ function shadow_digest_weather_format( array $data, string $city, string $units 
 		}
 	}
 
-	$deg   = 'imperial' === $units ? '°F' : '°C';
-	$speed = 'imperial' === $units ? 'mph' : 'km/h';
-	$cond  = shadow_digest_weather_condition( $code );
+	$deg     = 'imperial' === $units ? '°F' : '°C';
+	$speed   = 'imperial' === $units ? 'mph' : 'km/h';
+	$cond    = shadow_digest_weather_condition( $code );
 	$compass = shadow_digest_weather_compass( $wind_dir );
 
 	$line1 = sprintf(
@@ -291,7 +291,7 @@ function shadow_digest_weather_format( array $data, string $city, string $units 
 		$deg
 	);
 
-	$line2_parts = array();
+	$line2_parts   = array();
 	$line2_parts[] = sprintf(
 		/* translators: 1: compass point (e.g. NE), 2: wind speed number, 3: unit (mph/km/h). */
 		__( 'Wind %1$s at %2$s %3$s', 'broadside' ),
@@ -414,7 +414,7 @@ function shadow_digest_weather_compass( float $degrees ): string {
  * @return string
  */
 function shadow_digest_sanitize_weather_units( $value ): string {
-	$value = (string) $value;
+	$value   = (string) $value;
 	$allowed = array( 'auto', 'metric', 'imperial' );
 
 	return in_array( $value, $allowed, true ) ? $value : 'auto';

@@ -413,7 +413,7 @@ add_filter( 'wp_get_loading_optimization_attributes', 'shadow_digest_prioritize_
  * @since 1.3.7
  *
  * @param array<string, mixed> $query Args WP_Query will receive.
- * @param WP_Block              $block The Query block, including its attributes.
+ * @param WP_Block             $block The Query block, including its attributes.
  * @return array<string, mixed> The (possibly rewritten) query args.
  */
 function shadow_digest_aside_query_vars( array $query, WP_Block $block ): array {
