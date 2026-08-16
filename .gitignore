@@ -32,3 +32,7 @@ Thumbs.db
 
 # Screenshot output from ./scripts/shoot.sh — regenerate, do not commit
 /.shots/
+
+# Agent tooling — canonical copy lives in shadow-agent-markdown, never this repo
+.claude/
+.agents/
