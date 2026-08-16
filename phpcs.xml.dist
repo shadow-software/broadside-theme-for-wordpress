@@ -87,7 +87,7 @@
 
 	<!-- The minimum versions declared in style.css. -->
 	<config name="minimum_wp_version" value="7.0"/>
-	<config name="testVersion" value="8.2-"/>
+	<config name="testVersion" value="8.5-"/>
 	<rule ref="PHPCompatibilityWP"/>
 
 	<!--

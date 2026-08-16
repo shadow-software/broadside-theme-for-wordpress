@@ -5,7 +5,7 @@
  * Description:       The editorial blocks and masthead furniture for the Broadside theme — a short-answer box, key takeaways, a self-building table of contents, an FAQ that emits FAQPage schema, a sources list, a disclosure table, and the nameplate, folio rule and bylines a broadsheet needs.
  * Version:           1.3.3
  * Requires at least: 7.0
- * Requires PHP:      8.2
+ * Requires PHP:      8.5
  * Author:            Shadow Software LLC
  * Author URI:        https://shadowsoftware.com/
  * License:           GPL-2.0-or-later

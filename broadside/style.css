@@ -5,7 +5,7 @@ Author URI: https://shadowsoftware.com/
 Description: A block theme for news publications and journals of record. Broadside dresses a modern WordPress site as a broadsheet newspaper: a blackletter masthead, a folio rule, a three-column lead grid, and a long-read article layout with editorial furniture — a short-answer box, key takeaways, a table of contents, an FAQ, and a sources list. Every colour, rule and section name is a Customizer setting, so one codebase can dress two mastheads without a single hard-coded brand.
 Requires at least: 7.0
 Tested up to: 7.0
-Requires PHP: 8.2
+Requires PHP: 8.5
 Requires Plugins: broadside-blocks
 Version: 1.4.3
 License: GNU General Public License v2 or later
