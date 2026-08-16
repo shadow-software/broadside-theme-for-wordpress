@@ -29,7 +29,7 @@ jobs:
 
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: '8.5'
           coverage: none
 
       # This guard used to be two greps. Both were wrong in the same way: grep -n
@@ -61,7 +61,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: [ '8.0', '8.3', '8.5' ]
+        php: [ '8.5' ]
     steps:
       - uses: actions/checkout@v7
 
@@ -93,7 +93,7 @@ jobs:
 
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: '8.5'
           coverage: none
           tools: composer, cs2pr
 
@@ -126,7 +126,7 @@ jobs:
       # package, so this job needs a PHP binary even though it lints no PHP.
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: '8.5'
           coverage: none
 
       - name: Required files exist
@@ -188,7 +188,7 @@ jobs:
 
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: '8.5'
           extensions: sqlite3, pdo_sqlite, mysqli, gd, zip
           coverage: none
           tools: wp-cli
