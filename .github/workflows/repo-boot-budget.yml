@@ -15,4 +15,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: shadow-software/shadow-agent-markdown/.github/actions/repo-boot-budget@1412ed4c44798ad77dc49e47821359eb6fe86275
+      # Public repositories cannot consume the private central composite action.
+      # Keep this estimator byte-for-byte equivalent to ss-boot-cost at e782d03.
+      - name: Measure repository boot markdown
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          total = 0
+          for name in ("CLAUDE.md", "AGENTS.md"):
+              path = Path(name)
+              if path.is_symlink():
+                  raise SystemExit(f"unsupported root-doc symlink: {path}")
+              if not path.exists():
+                  continue
+              raw = path.read_bytes()
+              text = raw.decode("utf-8", errors="replace")
+              total += int(max(len(text.encode("utf-8")) / 4.0, len(text.split()) / 0.75))
+
+          print(f"repo boot estimate: {total:,} tokens (budget 100,000)")
+          if total > 100_000:
+              raise SystemExit("repo boot markdown exceeds 100,000-token budget")
+          PY
