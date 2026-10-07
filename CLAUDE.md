@@ -1,4 +1,10 @@
 # Broadside — a broadsheet block theme for WordPress
+## Estate hard override — primary `master` + EmDash lane
+
+Primary checkout: `master` only; never invent worktrees/branches. **EmDash** ADE
+owns `~/emdash/worktrees/` + `emdash/*` —
+`shadow-agent-markdown/protocols/EMDASH.md`. PRs: Paperclip or EmDash only.
+Canonical: `shadow-agent-markdown/protocols/GLOBAL-RULES.md`.
 
 One theme, two live publications. `cannabisdigest.net` and `marksmansdigest.com`
 run **byte-identical code**; everything that differs between them is Customizer
