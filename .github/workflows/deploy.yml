@@ -1,4 +1,4 @@
-name: Release
+name: Deploy
 
 # Tags v1.0.9 through v1.0.12 were pushed and nothing ever happened: there were
 # four tags and zero releases, because no workflow existed to build anything from
@@ -15,7 +15,7 @@ on:
     tags: [ 'v*' ]
 
 permissions:
-  contents: write        # required to create the release
+  contents: write
 
 jobs:
   release:
