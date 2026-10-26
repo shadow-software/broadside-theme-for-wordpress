@@ -217,6 +217,11 @@ check( str_contains( $fp['body'], 'digest-lead' ), 'the three-column lead grid i
 check( str_contains( $fp['body'], 'digest-nameplate' ), 'the nameplate is present' );
 check( str_contains( $fp['body'], 'digest-folio' ), 'the folio rule is present' );
 check( str_contains( $fp['body'], 'digest-section' ), 'the section grid is present' );
+check(
+	str_contains( $fp['body'], '--wp--preset--duotone--ink-paper' ),
+	'the ink-on-paper duotone preset is in the page CSS',
+	'customDuotone or the preset was removed — the editor control Futuristika needs will error again'
+);
 
 echo "\n── The lead story well — real prose, not a teaser\n";
 
@@ -413,6 +418,84 @@ check(
 	'footer podcast link is Podcast Index + new tab'
 );
 check( str_contains( $home['body'], 'noopener' ), 'external podcast link has noopener' );
+
+echo "\n── Blocks the site editor must already know\n";
+
+/*
+ * The front end can look finished while the site editor says the theme's own
+ * blocks are unsupported. Registration is a server fact; this asks WordPress,
+ * in the sandbox, whether the blocks from the single template and the front
+ * page are actually registered.
+ */
+$wp_bin = trim( (string) shell_exec( 'command -v wp' ) );
+$wp_path = dirname( __DIR__ ) . '/.local-wp';
+
+if ( '' === $wp_bin || ! is_dir( $wp_path ) ) {
+	check( false, 'wp-cli and the sandbox are available for registration checks' );
+} else {
+	$eval = <<<'PHP'
+$need = array(
+	'broadside/byline',
+	'broadside/author-bio',
+	'broadside/standards',
+	'broadside/related',
+	'broadside/newsletter',
+	'broadside/lead-promo',
+	'broadside/section-grid',
+	'broadside/lead-body',
+	'broadside/nameplate',
+);
+$missing = array();
+foreach ( $need as $name ) {
+	if ( ! WP_Block_Type_Registry::get_instance()->is_registered( $name ) ) {
+		$missing[] = $name;
+	}
+}
+echo implode( ',', $missing );
+PHP;
+
+	$cmd = escapeshellarg( $wp_bin )
+		. ' --path=' . escapeshellarg( $wp_path )
+		. ' --allow-root eval ' . escapeshellarg( $eval );
+	$missing = trim( (string) shell_exec( $cmd . ' 2>&1' ) );
+
+	check( '' === $missing, 'every template block is registered', $missing );
+
+	$eval = <<<'PHP'
+$cats = get_categories( array( 'number' => 1, 'hide_empty' => false ) );
+if ( empty( $cats ) || ! isset( $cats[0]->term_id ) ) {
+	echo 'NOCAT';
+	return;
+}
+$term = $cats[0];
+$html = broadside_blocks_render_section_grid(
+	array(
+		'categories' => array( (int) $term->term_id ),
+		'heading'    => 'Chosen sections',
+		'columns'    => 1,
+		'perColumn'  => 2,
+	)
+);
+echo ( str_contains( $html, 'Chosen sections' ) ? 'H' : '-' );
+echo ( str_contains( $html, $term->name ) ? 'N' : '-' );
+$args = broadside_blocks_query_args( array( 'post_type' => 'post' ) );
+echo ( isset( $args['suppress_filters'] ) && false === $args['suppress_filters'] ) ? 'Q' : '-';
+echo shadow_digest_font_preset_alias( 'body', 'var(--wp--preset--font-family--futura)' ) === '--wp--preset--font-family--body:var(--wp--preset--font-family--futura);' ? 'F' : '-';
+echo shadow_digest_font_preset_alias( 'body', 'url(https://evil.example)' ) === '' ? 'R' : '-';
+echo shadow_digest_sanitize_wordmark_font( '</style>' ) === 'masthead' ? 'S' : '-';
+PHP;
+
+	$cmd = escapeshellarg( $wp_bin )
+		. ' --path=' . escapeshellarg( $wp_path )
+		. ' --allow-root eval ' . escapeshellarg( $eval );
+	$got = trim( (string) shell_exec( $cmd . ' 2>&1' ) );
+
+	check(
+		str_starts_with( $got, 'HNQFRS' ),
+		'chosen sections, language queries and font aliases behave',
+		$got
+	);
+}
 
 echo "\n";
 echo str_repeat( '─', 70 ) . "\n";

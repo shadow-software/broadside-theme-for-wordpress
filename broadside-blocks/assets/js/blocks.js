@@ -1,24 +1,46 @@
 /**
- * Pressroom — block editor registration.
+ * Broadside — block editor registration.
  *
  * Written against the wp.* globals rather than JSX and a bundler, on purpose:
  * the file a reviewer reads is the file the browser runs. There is no build
- * step, no minified vendor blob, and nothing in the theme that cannot be
+ * step, no minified vendor blob, and nothing in the plugin that cannot be
  * audited by reading it.
  *
  * Every block here is registered with a `save` of null — they are dynamic blocks
- * rendered in PHP (see inc/blocks.php). What is saved to the database is the
+ * rendered in PHP (see inc-blocks.php). What is saved to the database is the
  * attributes and an HTML comment, so if the theme is ever removed the content
  * survives as data rather than as broken markup.
  *
- * @package Pressroom
+ * WordPress 7 does not put a PHP-only block into the editor. This file has to
+ * call registerBlockType for every block, including the ones that only preview
+ * through ServerSideRender. It is enqueued once from broadside-blocks.php.
+ *
+ * @package Broadside_Blocks
  * @since   1.0.0
  */
 
-( function ( blocks, element, blockEditor, components, i18n ) {
+( function ( blocks, element, blockEditor, components, i18n, serverSideRender, apiFetch ) {
 	'use strict';
 
 	var el = element.createElement;
+
+	if ( serverSideRender && serverSideRender.default ) {
+		serverSideRender = serverSideRender.default;
+	}
+
+	/**
+	 * Register a block once. A second copy of this file must not throw.
+	 *
+	 * @param {string} name     Block name.
+	 * @param {Object} settings Editor settings.
+	 */
+	function register( name, settings ) {
+		if ( blocks.getBlockType( name ) ) {
+			return;
+		}
+
+		blocks.registerBlockType( name, settings );
+	}
 	var Fragment = element.Fragment;
 	var __ = i18n.__;
 
@@ -165,7 +187,7 @@
 	 * Short Answer
 	 * ---------------------------------------------------------------------- */
 
-	blocks.registerBlockType( 'broadside/short-answer', {
+	register( 'broadside/short-answer', {
 		edit: function ( props ) {
 			var attributes = props.attributes;
 			var setAttributes = props.setAttributes;
@@ -237,7 +259,7 @@
 	 * Key Takeaways
 	 * ---------------------------------------------------------------------- */
 
-	blocks.registerBlockType( 'broadside/takeaways', {
+	register( 'broadside/takeaways', {
 		edit: function ( props ) {
 			var attributes = props.attributes;
 			var setAttributes = props.setAttributes;
@@ -337,7 +359,7 @@
 	 * pretending to show a list it cannot know yet.
 	 * ---------------------------------------------------------------------- */
 
-	blocks.registerBlockType( 'broadside/toc', {
+	register( 'broadside/toc', {
 		edit: function ( props ) {
 			var attributes = props.attributes;
 			var setAttributes = props.setAttributes;
@@ -400,7 +422,7 @@
 	 * FAQ
 	 * ---------------------------------------------------------------------- */
 
-	blocks.registerBlockType( 'broadside/faq', {
+	register( 'broadside/faq', {
 		edit: function ( props ) {
 			var attributes = props.attributes;
 			var setAttributes = props.setAttributes;
@@ -573,7 +595,7 @@
 	 * Sources
 	 * ---------------------------------------------------------------------- */
 
-	blocks.registerBlockType( 'broadside/sources', {
+	register( 'broadside/sources', {
 		edit: function ( props ) {
 			var attributes = props.attributes;
 			var setAttributes = props.setAttributes;
@@ -668,7 +690,7 @@
 	 * Disclosure Table
 	 * ---------------------------------------------------------------------- */
 
-	blocks.registerBlockType( 'broadside/disclosure-table', {
+	register( 'broadside/disclosure-table', {
 		edit: function ( props ) {
 			var attributes = props.attributes;
 			var setAttributes = props.setAttributes;
@@ -948,10 +970,210 @@
 			return null;
 		},
 	} );
+
+	/**
+	 * Preview a PHP-rendered block, with an optional inspector.
+	 *
+	 * These blocks have no saved markup. Without a client registration the
+	 * site editor turns them into core/missing and reports that the site
+	 * does not support them.
+	 *
+	 * @param {string}   name       Block name.
+	 * @param {string}   title      Shown when the preview is empty (template with no post).
+	 * @param {Function} inspector  Optional. Receives the block props, returns elements.
+	 */
+	function phpBlock( name, title, inspector ) {
+		register( name, {
+			edit: function ( props ) {
+				return el(
+					element.Fragment,
+					null,
+					inspector ? inspector( props ) : null,
+					el(
+						'div',
+						useBlockProps(),
+						el( serverSideRender, {
+							block: name,
+							attributes: props.attributes,
+							EmptyResponsePlaceholder: function () {
+								return el(
+									'p',
+									{ className: 'broadside-block-placeholder' },
+									title
+								);
+							},
+						} )
+					)
+				);
+			},
+			save: function () {
+				return null;
+			},
+		} );
+	}
+
+	/**
+	 * Category checklist for the section grid.
+	 *
+	 * An empty selection keeps the theme's view-ranked list. A saved list is
+	 * what a language-specific front page uses to differ from the others.
+	 *
+	 * @param {Object} props Block props.
+	 * @return {Object} Inspector controls.
+	 */
+	function sectionGridInspector( props ) {
+		var selected = props.attributes.categories || [];
+		var terms = element.useState( [] );
+		var list = terms[ 0 ];
+		var setList = terms[ 1 ];
+
+		element.useEffect( function () {
+			apiFetch( {
+				path: '/wp/v2/categories?per_page=100&hide_empty=false&orderby=name&order=asc',
+			} )
+				.then( function ( rows ) {
+					setList( Array.isArray( rows ) ? rows : [] );
+				} )
+				.catch( function () {
+					setList( [] );
+				} );
+		}, [] );
+
+		function toggle( id ) {
+			var next = selected.indexOf( id ) === -1
+				? selected.concat( [ id ] )
+				: selected.filter( function ( item ) {
+						return item !== id;
+				  } );
+
+			props.setAttributes( { categories: next } );
+		}
+
+		return el(
+			InspectorControls,
+			null,
+			el(
+				PanelBody,
+				{ title: __( 'Sections', 'broadside-blocks' ), initialOpen: true },
+				el( TextControl, {
+					label: __( 'Heading', 'broadside-blocks' ),
+					value: props.attributes.heading || '',
+					onChange: function ( value ) {
+						props.setAttributes( { heading: value } );
+					},
+				} ),
+				el( TextControl, {
+					label: __( 'Columns', 'broadside-blocks' ),
+					type: 'number',
+					min: 1,
+					max: 12,
+					value: String( props.attributes.columns || 6 ),
+					onChange: function ( value ) {
+						props.setAttributes( { columns: parseInt( value, 10 ) || 6 } );
+					},
+				} ),
+				el( TextControl, {
+					label: __( 'Headlines per column', 'broadside-blocks' ),
+					type: 'number',
+					min: 1,
+					max: 10,
+					value: String( props.attributes.perColumn || 3 ),
+					onChange: function ( value ) {
+						props.setAttributes( { perColumn: parseInt( value, 10 ) || 3 } );
+					},
+				} ),
+				el(
+					'p',
+					{ className: 'components-base-control__help' },
+					__(
+						'Leave every box unticked to rank sections by what readers open. Tick a list to print those categories, in the order you tick them. On a multilingual site, tick the categories of the language this template is for.',
+						'broadside-blocks'
+					)
+				),
+				list.map( function ( term ) {
+					return el( components.CheckboxControl, {
+						key: term.id,
+						label: term.name,
+						checked: selected.indexOf( term.id ) !== -1,
+						onChange: function () {
+							toggle( term.id );
+						},
+					} );
+				} )
+			)
+		);
+	}
+
+	phpBlock( 'broadside/utility-bar', __( 'Utility bar', 'broadside-blocks' ) );
+	phpBlock( 'broadside/nameplate', __( 'Nameplate', 'broadside-blocks' ) );
+	phpBlock( 'broadside/folio', __( 'Folio rule', 'broadside-blocks' ) );
+	phpBlock( 'broadside/colophon', __( 'Colophon', 'broadside-blocks' ) );
+	phpBlock( 'broadside/newsletter', __( 'Newsletter', 'broadside-blocks' ) );
+	phpBlock( 'broadside/lead-promo', __( 'Lead column promo', 'broadside-blocks' ) );
+	phpBlock( 'broadside/byline', __( 'Byline', 'broadside-blocks' ) );
+	phpBlock( 'broadside/author-bio', __( 'Author bio', 'broadside-blocks' ) );
+	phpBlock( 'broadside/standards', __( 'Editorial standards', 'broadside-blocks' ) );
+	phpBlock( 'broadside/related', __( 'Continue reading', 'broadside-blocks' ), function ( props ) {
+		return el(
+			InspectorControls,
+			null,
+			el(
+				PanelBody,
+				{ title: __( 'Continue reading', 'broadside-blocks' ) },
+				el( TextControl, {
+					label: __( 'Heading', 'broadside-blocks' ),
+					value: props.attributes.heading || '',
+					onChange: function ( value ) {
+						props.setAttributes( { heading: value } );
+					},
+				} ),
+				el( TextControl, {
+					label: __( 'Stories', 'broadside-blocks' ),
+					type: 'number',
+					min: 1,
+					max: 6,
+					value: String( props.attributes.count || 3 ),
+					onChange: function ( value ) {
+						props.setAttributes( { count: parseInt( value, 10 ) || 3 } );
+					},
+				} )
+			)
+		);
+	} );
+	phpBlock( 'broadside/lead-body', __( 'Lead story body', 'broadside-blocks' ), function ( props ) {
+		return el(
+			InspectorControls,
+			null,
+			el(
+				PanelBody,
+				{ title: __( 'Lead story', 'broadside-blocks' ) },
+				el( TextControl, {
+					label: __( 'Paragraphs', 'broadside-blocks' ),
+					type: 'number',
+					min: 1,
+					max: 8,
+					value: String( props.attributes.paragraphs || 4 ),
+					onChange: function ( value ) {
+						props.setAttributes( { paragraphs: parseInt( value, 10 ) || 4 } );
+					},
+				} ),
+				el( TextControl, {
+					label: __( 'Continue link', 'broadside-blocks' ),
+					value: props.attributes.moreText || '',
+					onChange: function ( value ) {
+						props.setAttributes( { moreText: value } );
+					},
+				} )
+			)
+		);
+	} );
+	phpBlock( 'broadside/section-grid', __( 'Section grid', 'broadside-blocks' ), sectionGridInspector );
 } )(
 	window.wp.blocks,
 	window.wp.element,
 	window.wp.blockEditor,
 	window.wp.components,
-	window.wp.i18n
+	window.wp.i18n,
+	window.wp.serverSideRender,
+	window.wp.apiFetch
 );

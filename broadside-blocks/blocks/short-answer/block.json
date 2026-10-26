@@ -28,6 +28,5 @@
 			"selector": ".wp-block-digest-short-answer__body"
 		}
 	},
-	"editorScript": "file:../../assets/js/blocks.js",
 	"style": "broadside"
 }

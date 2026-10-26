@@ -13,7 +13,19 @@
 			"defaultGradients": false,
 			"defaultDuotone": false,
 			"custom": true,
-			"customDuotone": false,
+			"customDuotone": true,
+			"duotone": [
+				{
+					"name": "Ink on paper",
+					"slug": "ink-paper",
+					"colors": [ "#1c1a17", "#f4efe4" ]
+				},
+				{
+					"name": "Accent on paper",
+					"slug": "accent-paper",
+					"colors": [ "#6b1f1f", "#f4efe4" ]
+				}
+			],
 			"palette": [
 				{
 					"slug": "ink",

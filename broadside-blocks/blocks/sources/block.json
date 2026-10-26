@@ -28,6 +28,5 @@
 			}
 		}
 	},
-	"editorScript": "file:../../assets/js/blocks.js",
 	"style": "broadside"
 }

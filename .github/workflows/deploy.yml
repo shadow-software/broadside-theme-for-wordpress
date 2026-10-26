@@ -44,6 +44,9 @@ jobs:
       - name: The guard itself still catches the outage bug
         run: ./scripts/guard-selftest.sh
 
+      - name: Duotone, fonts and the editor registration stay available
+        run: php scripts/guard-publisher-features.php
+
       - name: The theme renders, and the pages are correct
         run: |
           ./scripts/local-wp.sh up

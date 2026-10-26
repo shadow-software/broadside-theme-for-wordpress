@@ -110,6 +110,9 @@ jobs:
       - name: The theme does not do plugin things
         run: ./scripts/guard-no-plugin-territory.sh
 
+      - name: Duotone, fonts and the editor registration stay available
+        run: php scripts/guard-publisher-features.php
+
   lint:
     name: Lint (PHP ${{ matrix.php }})
     runs-on: ubuntu-latest

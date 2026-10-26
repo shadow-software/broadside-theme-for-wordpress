@@ -3,7 +3,7 @@
  * Plugin Name:       Broadside Blocks
  * Plugin URI:        https://github.com/shadow-software/broadside-blocks-for-wordpress
  * Description:       The editorial blocks and masthead furniture for the Broadside theme — a short-answer box, key takeaways, a self-building table of contents, an FAQ that emits FAQPage schema, a sources list, a disclosure table, and the nameplate, folio rule and bylines a broadsheet needs.
- * Version:           1.3.3
+ * Version:           1.4.4
  * Requires at least: 7.0
  * Requires PHP:      8.5
  * Author:            Shadow Software LLC
@@ -73,7 +73,7 @@ defined( 'ABSPATH' ) || exit;
  */
 define( 'BROADSIDE_BLOCKS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'BROADSIDE_BLOCKS_URL', plugin_dir_url( __FILE__ ) );
-define( 'BROADSIDE_BLOCKS_VERSION', '1.3.3' );
+define( 'BROADSIDE_BLOCKS_VERSION', '1.4.4' );
 
 /**
  * Is the Broadside theme active?
@@ -133,7 +133,7 @@ add_action( 'admin_notices', 'broadside_blocks_admin_notice' );
  * behind broadside_blocks_theme_active() — so under another theme they return
  * before they can reach an undefined function. Safe.
  *
- * The exception is shadow_digest_print_faq_schema(), which runs on wp_footer and
+ * The exception is broadside_blocks_print_faq_schema(), which runs on wp_footer and
  * therefore NOT through the render guard. The obvious fix — have the plugin define
  * its own copy behind `if ( ! function_exists() )` — is wrong, and wrong in a way
  * that is worth writing down, because it looks obviously right:
@@ -154,4 +154,35 @@ add_action( 'admin_notices', 'broadside_blocks_admin_notice' );
 
 require_once BROADSIDE_BLOCKS_PATH . 'inc-blocks.php';
 require_once BROADSIDE_BLOCKS_PATH . 'inc-blocks-masthead.php';
+
+/**
+ * Load the editor script once.
+ *
+ * Seven block.json files used to point editorScript at this same file. WordPress
+ * then printed it once per block. The file calls registerBlockType() as it runs,
+ * so the second copy found the blocks already registered and the blocks that
+ * this file never registered — byline, author bio, the single template — stayed
+ * unregistered. WordPress 7 shows that as "Your site doesn't include support
+ * for this block" even while the front end, which only needs the PHP render,
+ * looks fine.
+ *
+ * @since 1.4.4
+ * @return void
+ */
+function broadside_blocks_enqueue_editor_script(): void {
+	$asset_path = BROADSIDE_BLOCKS_PATH . 'assets/js/blocks.asset.php';
+	$asset      = file_exists( $asset_path ) ? require $asset_path : array();
+	$deps       = isset( $asset['dependencies'] ) && is_array( $asset['dependencies'] )
+		? $asset['dependencies']
+		: array();
+
+	wp_enqueue_script(
+		'broadside-blocks-editor',
+		BROADSIDE_BLOCKS_URL . 'assets/js/blocks.js',
+		$deps,
+		isset( $asset['version'] ) ? (string) $asset['version'] : BROADSIDE_BLOCKS_VERSION,
+		true
+	);
+}
+add_action( 'enqueue_block_editor_assets', 'broadside_blocks_enqueue_editor_script' );
 

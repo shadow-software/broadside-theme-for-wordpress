@@ -47,7 +47,7 @@ defined( 'ABSPATH' ) || exit;
  * @param callable $render   The real render callback.
  * @return string The rendered HTML, or '' if this block is already rendering.
  */
-function shadow_digest_guard( string $name, callable $render ): string {
+function broadside_blocks_guard( string $name, callable $render ): string {
 	static $rendering = array();
 
 	/*
@@ -101,23 +101,23 @@ function shadow_digest_guard( string $name, callable $render ): string {
  * Each block is a directory with a block.json. WordPress reads the metadata,
  * wires up the editor script, and calls the render callback named below.
  *
- * Every callback is wrapped in shadow_digest_guard(), so no Broadside block can ever
+ * Every callback is wrapped in broadside_blocks_guard(), so no Broadside block can ever
  * recurse into itself — see the note on that function.
  *
  * @since 1.0.0
  * @return void
  */
-function shadow_digest_register_blocks(): void {
+function broadside_blocks_register_blocks(): void {
 	$blocks = array(
-		'short-answer'     => 'shadow_digest_render_short_answer',
-		'takeaways'        => 'shadow_digest_render_takeaways',
-		'toc'              => 'shadow_digest_render_toc',
-		'faq'              => 'shadow_digest_render_faq',
-		'sources'          => 'shadow_digest_render_sources',
-		'disclosure-table' => 'shadow_digest_render_disclosure_table',
-		'section-grid'     => 'shadow_digest_render_section_grid',
-		'related'          => 'shadow_digest_render_related',
-		'lead-body'        => 'shadow_digest_render_lead_body',
+		'short-answer'     => 'broadside_blocks_render_short_answer',
+		'takeaways'        => 'broadside_blocks_render_takeaways',
+		'toc'              => 'broadside_blocks_render_toc',
+		'faq'              => 'broadside_blocks_render_faq',
+		'sources'          => 'broadside_blocks_render_sources',
+		'disclosure-table' => 'broadside_blocks_render_disclosure_table',
+		'section-grid'     => 'broadside_blocks_render_section_grid',
+		'related'          => 'broadside_blocks_render_related',
+		'lead-body'        => 'broadside_blocks_render_lead_body',
 	);
 
 	foreach ( $blocks as $name => $callback ) {
@@ -133,14 +133,14 @@ function shadow_digest_register_blocks(): void {
 
 				/*
 				 * Guarded, so no Broadside block can recurse into itself — see
-				 * shadow_digest_guard() and docs/INCIDENT-2026-07-13-vps-outage.md.
+				 * broadside_blocks_guard() and docs/INCIDENT-2026-07-13-vps-outage.md.
 				 *
 				 * WordPress passes ( $attributes, $content, $block ); these
 				 * callbacks declare only the first, so only the first is passed
 				 * on. Handing a one-argument function three arguments is a fatal.
 				 */
 				'render_callback' => static function ( $attributes ) use ( $name, $callback ): string {
-					return shadow_digest_guard(
+					return broadside_blocks_guard(
 						$name,
 						static fn(): string => (string) call_user_func( $callback, (array) $attributes )
 					);
@@ -149,7 +149,7 @@ function shadow_digest_register_blocks(): void {
 		);
 	}
 }
-add_action( 'init', 'shadow_digest_register_blocks' );
+add_action( 'init', 'broadside_blocks_register_blocks' );
 
 /**
  * Put the theme's blocks in their own editor category, so an editor can find
@@ -159,7 +159,7 @@ add_action( 'init', 'shadow_digest_register_blocks' );
  * @param array<int, array<string, mixed>> $categories The registered categories.
  * @return array<int, array<string, mixed>> The filtered categories.
  */
-function shadow_digest_block_category( array $categories ): array {
+function broadside_blocks_block_category( array $categories ): array {
 	array_unshift(
 		$categories,
 		array(
@@ -171,7 +171,7 @@ function shadow_digest_block_category( array $categories ): array {
 
 	return $categories;
 }
-add_filter( 'block_categories_all', 'shadow_digest_block_category' );
+add_filter( 'block_categories_all', 'broadside_blocks_block_category' );
 
 /*
  * Render callbacks.
@@ -192,7 +192,7 @@ add_filter( 'block_categories_all', 'shadow_digest_block_category' );
  * @param array<string, mixed> $attributes The block attributes.
  * @return string The rendered HTML.
  */
-function shadow_digest_render_short_answer( array $attributes ): string {
+function broadside_blocks_render_short_answer( array $attributes ): string {
 	$body = isset( $attributes['answer'] ) ? (string) $attributes['answer'] : '';
 
 	if ( '' === trim( wp_strip_all_tags( $body ) ) ) {
@@ -218,7 +218,7 @@ function shadow_digest_render_short_answer( array $attributes ): string {
  * @param array<string, mixed> $attributes The block attributes.
  * @return string The rendered HTML.
  */
-function shadow_digest_render_takeaways( array $attributes ): string {
+function broadside_blocks_render_takeaways( array $attributes ): string {
 	$items = isset( $attributes['items'] ) && is_array( $attributes['items'] )
 		? $attributes['items']
 		: array();
@@ -267,14 +267,14 @@ function shadow_digest_render_takeaways( array $attributes ): string {
  * @param array<string, mixed> $attributes The block attributes.
  * @return string The rendered HTML.
  */
-function shadow_digest_render_toc( array $attributes ): string {
+function broadside_blocks_render_toc( array $attributes ): string {
 	$post = get_post();
 
 	if ( ! $post instanceof WP_Post ) {
 		return '';
 	}
 
-	$headings = shadow_digest_extract_headings( $post->post_content );
+	$headings = broadside_blocks_extract_headings( $post->post_content );
 
 	if ( empty( $headings ) ) {
 		return '';
@@ -323,7 +323,7 @@ function shadow_digest_render_toc( array $attributes ): string {
  * @param string $content The raw post content.
  * @return array<int, array{level:int, text:string, anchor:string}> The headings, in document order.
  */
-function shadow_digest_extract_headings( string $content ): array {
+function broadside_blocks_extract_headings( string $content ): array {
 	if ( '' === trim( $content ) ) {
 		return array();
 	}
@@ -390,7 +390,7 @@ function shadow_digest_extract_headings( string $content ): array {
  * @param string $content The rendered post content.
  * @return string The content, with anchors guaranteed.
  */
-function shadow_digest_add_heading_anchors( string $content ): string {
+function broadside_blocks_add_heading_anchors( string $content ): string {
 	if ( ! is_singular() || ! in_the_loop() || ! is_main_query() ) {
 		return $content;
 	}
@@ -441,7 +441,7 @@ function shadow_digest_add_heading_anchors( string $content ): string {
 
 	return is_string( $result ) ? $result : $content;
 }
-add_filter( 'the_content', 'shadow_digest_add_heading_anchors', 8 );
+add_filter( 'the_content', 'broadside_blocks_add_heading_anchors', 8 );
 
 /**
  * The FAQ, which also emits its own FAQPage structured data.
@@ -450,7 +450,7 @@ add_filter( 'the_content', 'shadow_digest_add_heading_anchors', 8 );
  * @param array<string, mixed> $attributes The block attributes.
  * @return string The rendered HTML.
  */
-function shadow_digest_render_faq( array $attributes ): string {
+function broadside_blocks_render_faq( array $attributes ): string {
 	$pairs = isset( $attributes['items'] ) && is_array( $attributes['items'] )
 		? $attributes['items']
 		: array();
@@ -485,7 +485,7 @@ function shadow_digest_render_faq( array $attributes ): string {
 
 	// Hand the questions to the schema layer, which prints one FAQPage node in
 	// the footer however many FAQ blocks the post contains.
-	shadow_digest_collect_faq( $questions );
+	broadside_blocks_collect_faq( $questions );
 
 	$items = '';
 
@@ -517,7 +517,7 @@ function shadow_digest_render_faq( array $attributes ): string {
  * @param array<int, array{question:string, answer:string}>|null $add Pairs to add, or null to read.
  * @return array<int, array{question:string, answer:string}> Everything collected so far.
  */
-function shadow_digest_collect_faq( ?array $add = null ): array {
+function broadside_blocks_collect_faq( ?array $add = null ): array {
 	static $collected = array();
 
 	if ( null !== $add ) {
@@ -548,30 +548,30 @@ function shadow_digest_collect_faq( ?array $add = null ): array {
  *
  * There is no conflict to avoid: an SEO plugin only emits FAQPage from its own
  * FAQ block, which is a different block. If a publisher somehow ends up with
- * both, the shadow_digest_emit_faq_schema filter switches this off.
+ * both, the broadside_blocks_emit_faq_schema filter switches this off.
  *
  * @since 1.0.3
  * @return void
  */
-function shadow_digest_print_faq_schema(): void {
+function broadside_blocks_print_faq_schema(): void {
 
 	/**
-	 * Filters whether the theme emits FAQPage structured data.
+	 * Filters whether Broadside Blocks emits FAQPage structured data.
 	 *
 	 * Set to false only if something else on the site already emits FAQPage for
-	 * these same questions — which, since the questions come from this theme's
+	 * these same questions — which, since the questions come from this plugin's
 	 * own block, is unlikely.
 	 *
 	 * @since 1.0.3
 	 * @param bool $emit Whether to emit the FAQ schema.
 	 */
-	if ( ! apply_filters( 'shadow_digest_emit_faq_schema', true ) ) {
+	if ( ! apply_filters( 'broadside_blocks_emit_faq_schema', true ) ) {
 		return;
 	}
 
 	/*
 	 * This runs on wp_footer, NOT through a render callback, so it is the one path
-	 * in this plugin that shadow_digest_guard()'s theme check does not cover — and
+	 * in this plugin that broadside_blocks_guard()'s theme check does not cover — and
 	 * below it calls shadow_digest_plain_text(), which lives in the theme. Under any
 	 * other theme that is an undefined function and a fatal in the page footer.
 	 *
@@ -584,7 +584,7 @@ function shadow_digest_print_faq_schema(): void {
 		return;
 	}
 
-	$questions = shadow_digest_collect_faq();
+	$questions = broadside_blocks_collect_faq();
 
 	if ( empty( $questions ) ) {
 		return;
@@ -623,7 +623,7 @@ function shadow_digest_print_faq_schema(): void {
 
 	echo '<script type="application/ld+json">' . $json . '</script>' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_json_encode() with default flags; JSON-LD must remain valid JSON.
 }
-add_action( 'wp_footer', 'shadow_digest_print_faq_schema' );
+add_action( 'wp_footer', 'broadside_blocks_print_faq_schema' );
 
 /**
  * The sources list — the receipts.
@@ -632,7 +632,7 @@ add_action( 'wp_footer', 'shadow_digest_print_faq_schema' );
  * @param array<string, mixed> $attributes The block attributes.
  * @return string The rendered HTML.
  */
-function shadow_digest_render_sources( array $attributes ): string {
+function broadside_blocks_render_sources( array $attributes ): string {
 	$items = isset( $attributes['items'] ) && is_array( $attributes['items'] )
 		? $attributes['items']
 		: array();
@@ -694,7 +694,7 @@ function shadow_digest_render_sources( array $attributes ): string {
  * @param array<string, mixed> $attributes The block attributes.
  * @return string The rendered HTML.
  */
-function shadow_digest_render_lead_body( array $attributes ): string {
+function broadside_blocks_render_lead_body( array $attributes ): string {
 	$post = get_post();
 
 	if ( ! $post instanceof WP_Post ) {
@@ -800,7 +800,7 @@ function shadow_digest_render_lead_body( array $attributes ): string {
  * @param array<string, mixed> $attributes The block attributes.
  * @return string The rendered HTML.
  */
-function shadow_digest_render_related( array $attributes ): string {
+function broadside_blocks_render_related( array $attributes ): string {
 	$current = get_post();
 
 	if ( ! $current instanceof WP_Post ) {
@@ -810,12 +810,14 @@ function shadow_digest_render_related( array $attributes ): string {
 	$count = isset( $attributes['count'] ) ? absint( $attributes['count'] ) : 3;
 	$count = max( 1, min( 6, $count ) );
 
-	$args = array(
-		'numberposts'         => $count,
-		'post_status'         => 'publish',
-		'post__not_in'        => array( $current->ID ),
-		'ignore_sticky_posts' => true,
-		'no_found_rows'       => true,
+	$args = broadside_blocks_query_args(
+		array(
+			'numberposts'         => $count,
+			'post_status'         => 'publish',
+			'post__not_in'        => array( $current->ID ),
+			'ignore_sticky_posts' => true,
+			'no_found_rows'       => true,
+		)
 	);
 
 	// Prefer stories from the same section — a reader who just finished a
@@ -890,6 +892,57 @@ function shadow_digest_render_related( array $attributes ): string {
 }
 
 /**
+ * Query arguments that Polylang is allowed to see.
+ *
+ * get_posts() sets suppress_filters by default, which strips Polylang's language
+ * clause. A Turkish homepage would then list English stories in the section index.
+ *
+ * @since 1.4.4
+ * @param array<string, mixed> $args Query arguments.
+ * @return array<string, mixed>
+ */
+function broadside_blocks_query_args( array $args ): array {
+	$args['suppress_filters'] = false;
+
+	if ( function_exists( 'pll_current_language' ) ) {
+		$lang = pll_current_language();
+
+		if ( is_string( $lang ) && '' !== $lang ) {
+			$args['lang'] = $lang;
+		}
+	}
+
+	return $args;
+}
+
+/**
+ * Categories the editor picked for the section grid, in that order.
+ *
+ * An empty attribute means "rank them", which is the historical behaviour.
+ *
+ * @since 1.4.4
+ * @param array<string, mixed> $attributes Block attributes.
+ * @return array<int, WP_Term>
+ */
+function broadside_blocks_selected_categories( array $attributes ): array {
+	$ids = isset( $attributes['categories'] ) && is_array( $attributes['categories'] )
+		? $attributes['categories']
+		: array();
+
+	$terms = array();
+
+	foreach ( $ids as $id ) {
+		$term = get_category( absint( $id ) );
+
+		if ( $term instanceof WP_Term && 'category' === $term->taxonomy ) {
+			$terms[] = $term;
+		}
+	}
+
+	return $terms;
+}
+
+/**
  * The section grid — "Inside This Week's Edition".
  *
  * One column per category, each listing that category's most recent headlines.
@@ -902,22 +955,28 @@ function shadow_digest_render_related( array $attributes ): string {
  * @param array<string, mixed> $attributes The block attributes.
  * @return string The rendered HTML.
  */
-function shadow_digest_render_section_grid( array $attributes ): string {
+function broadside_blocks_render_section_grid( array $attributes ): string {
 	$columns    = isset( $attributes['columns'] ) ? absint( $attributes['columns'] ) : 6;
 	$per_column = isset( $attributes['perColumn'] ) ? absint( $attributes['perColumn'] ) : 3;
 	$columns    = max( 1, min( 12, $columns ) );
 	$per_column = max( 1, min( 10, $per_column ) );
 
-	// Prefer the theme helper when present (view-ranked); fall back to count.
-	if ( function_exists( 'shadow_digest_categories_by_views' ) ) {
+	// An explicit list wins. Otherwise prefer the theme helper (view-ranked).
+	$picked = broadside_blocks_selected_categories( $attributes );
+
+	if ( ! empty( $picked ) ) {
+		$categories = $picked;
+	} elseif ( function_exists( 'shadow_digest_categories_by_views' ) ) {
 		$categories = shadow_digest_categories_by_views( $columns );
 	} else {
 		$categories = get_categories(
-			array(
-				'orderby'    => 'count',
-				'order'      => 'DESC',
-				'number'     => $columns,
-				'hide_empty' => true,
+			broadside_blocks_query_args(
+				array(
+					'orderby'    => 'count',
+					'order'      => 'DESC',
+					'number'     => $columns,
+					'hide_empty' => true,
+				)
 			)
 		);
 	}
@@ -930,12 +989,14 @@ function shadow_digest_render_section_grid( array $attributes ): string {
 
 	foreach ( $categories as $category ) {
 		$posts = get_posts(
-			array(
-				'category'            => $category->term_id,
-				'numberposts'         => $per_column,
-				'post_status'         => 'publish',
-				'ignore_sticky_posts' => true,
-				'no_found_rows'       => true,
+			broadside_blocks_query_args(
+				array(
+					'category'            => $category->term_id,
+					'numberposts'         => $per_column,
+					'post_status'         => 'publish',
+					'ignore_sticky_posts' => true,
+					'no_found_rows'       => true,
+				)
 			)
 		);
 
@@ -994,7 +1055,7 @@ function shadow_digest_render_section_grid( array $attributes ): string {
  * @param array<string, mixed> $attributes The block attributes.
  * @return string The rendered HTML.
  */
-function shadow_digest_render_disclosure_table( array $attributes ): string {
+function broadside_blocks_render_disclosure_table( array $attributes ): string {
 	$rows = isset( $attributes['rows'] ) && is_array( $attributes['rows'] )
 		? $attributes['rows']
 		: array();

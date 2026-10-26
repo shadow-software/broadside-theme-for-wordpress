@@ -3,7 +3,7 @@ Contributors: shadowsoftware
 Requires at least: 7.0
 Tested up to: 7.0
 Requires PHP: 8.5
-Stable tag: 1.4.3
+Stable tag: 1.4.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Tags: news, blog, one-column, two-columns, three-columns, custom-colors, custom-logo, custom-menu, block-patterns, block-styles, editor-style, featured-images, full-site-editing, rtl-language-support, style-variations, template-editing, translation-ready, wide-blocks
@@ -20,6 +20,14 @@ beside it. Above them sits a blackletter nameplate flanked by two "ears", a foli
 rule carrying the volume, the date and the motto, and a section navigation. Below
 them, an index of every section and its latest headlines, built from your
 categories.
+
+Fonts installed under Appearance → Editor → Styles apply to body text and
+headings. The nameplate face, including those installed families, is chosen
+under Appearance → Customize → Broadside. Duotone is available on images.
+
+With Polylang, one Front Page template serves every language and the queries
+follow the language. A different arrangement is a template whose slug is
+`front-page-tr` or `front-page--tr` (the same pattern for `single`).
 
 Articles get the furniture a reported feature actually needs, as blocks:
 
@@ -193,6 +201,11 @@ The front page's lead photograph is no longer lazy-loaded. If you run Broadside 
 a site that is measured on Core Web Vitals, this release is worth taking.
 
 == Changelog ==
+
+= 1.4.4 =
+* Duotone works in the editor. The theme no longer strips the SVG filters WordPress uses to paint it, and ships two duotone presets plus custom duotones.
+* Fonts installed in the site editor (Styles → Typography) apply to body text and headings. The nameplate typeface list includes those families as well as the bundled blackletter, display, and body faces.
+* Polylang: secondary queries stay in the current language. A template saved as `front-page-tr` (or `front-page--tr`, and the same pattern for `single`) is used for that language on the front end. The editor itself always opens the template you clicked.
 
 = 1.4.3 =
 * Podcast embeds now hang directly under the byline instead of being pushed down

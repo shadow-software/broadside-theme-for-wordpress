@@ -249,10 +249,11 @@ function shadow_digest_settings(): array {
 			'type'     => 'select',
 			'section'  => 'shadow_digest_masthead',
 			'label'    => __( 'Nameplate typeface', 'broadside' ),
-			'help'     => __( 'Blackletter is the traditional newspaper nameplate. Choose the display serif for a cleaner, more modern masthead — or upload a custom logo under Site Identity to replace the type entirely.', 'broadside' ),
+			'help'     => __( 'Blackletter is the traditional newspaper nameplate. Display and body are the theme faces. Fonts you install under Appearance → Editor → Styles also appear here. A custom logo under Site Identity replaces the type entirely.', 'broadside' ),
 			'choices'  => array(
 				'masthead' => __( 'Blackletter (UnifrakturMaguntia)', 'broadside' ),
 				'display'  => __( 'Display serif (Libre Caslon)', 'broadside' ),
+				'body'     => __( 'Body (Source Serif)', 'broadside' ),
 			),
 		),
 
@@ -739,7 +740,9 @@ function shadow_digest_customize_register( WP_Customize_Manager $wp_customize ):
 		);
 
 		if ( isset( $args['choices'] ) ) {
-			$control['choices'] = $args['choices'];
+			$control['choices'] = 'shadow_digest_wordmark_font' === $id
+				? shadow_digest_font_family_choices()
+				: $args['choices'];
 		}
 
 		// The colour picker needs a dedicated control class; everything else is
@@ -834,9 +837,13 @@ function shadow_digest_custom_properties(): string {
 	$shade       = (string) shadow_digest_get( 'shadow_digest_paper_shade' );
 	$tint        = (string) shadow_digest_get( 'shadow_digest_paper_tint' );
 
-	$wordmark = 'display' === shadow_digest_get( 'shadow_digest_wordmark_font' )
-		? 'var(--wp--preset--font-family--display)'
-		: 'var(--wp--preset--font-family--masthead)';
+	$wordmark_slug = (string) shadow_digest_get( 'shadow_digest_wordmark_font' );
+
+	if ( ! preg_match( '/^[a-z0-9-]+$/', $wordmark_slug ) ) {
+		$wordmark_slug = 'masthead';
+	}
+
+	$wordmark = 'var(--wp--preset--font-family--' . $wordmark_slug . ')';
 
 	$texture = shadow_digest_get( 'shadow_digest_texture' )
 		? 'radial-gradient(rgba(28,26,23,.014) 1px, transparent 1px)'
@@ -885,6 +892,14 @@ function shadow_digest_custom_properties(): string {
 	if ( '' !== $device ) {
 		$css .= '--digest-masthead-ink:var(--wp--preset--color--ink);';
 	}
+
+	/*
+	 * The newspaper CSS pins masthead, display, and body to those preset
+	 * variables. The site editor writes a publisher's font-library choice onto
+	 * Text and Headings, not onto those variables. Alias the presets at the
+	 * ones they picked so the grid follows Styles → Typography.
+	 */
+	$css .= shadow_digest_user_font_aliases();
 
 	$css .= '}';
 
@@ -951,14 +966,131 @@ function shadow_digest_sanitize_multiline( $value ): string {
 }
 
 /**
+ * Font families the nameplate control can offer.
+ *
+ * Theme presets first, then any family the publisher installed with the
+ * font library. The slug is what becomes the CSS preset variable.
+ *
+ * @since 1.4.4
+ * @return array<string, string> Slug => label.
+ */
+function shadow_digest_font_family_choices(): array {
+	$choices = array(
+		'masthead' => __( 'Blackletter (UnifrakturMaguntia)', 'broadside' ),
+		'display'  => __( 'Display serif (Libre Caslon)', 'broadside' ),
+		'body'     => __( 'Body (Source Serif)', 'broadside' ),
+	);
+
+	if ( ! function_exists( 'wp_get_global_settings' ) ) {
+		return $choices;
+	}
+
+	$families = wp_get_global_settings( array( 'typography', 'fontFamilies' ) );
+
+	if ( ! is_array( $families ) ) {
+		return $choices;
+	}
+
+	$lists = isset( $families['theme'] ) || isset( $families['custom'] ) || isset( $families['default'] )
+		? $families
+		: array( 'theme' => $families );
+
+	foreach ( $lists as $group ) {
+		if ( ! is_array( $group ) ) {
+			continue;
+		}
+
+		foreach ( $group as $family ) {
+			if ( ! is_array( $family ) || empty( $family['slug'] ) || empty( $family['name'] ) ) {
+				continue;
+			}
+
+			$slug = (string) $family['slug'];
+
+			if ( ! preg_match( '/^[a-z0-9-]+$/', $slug ) || isset( $choices[ $slug ] ) ) {
+				continue;
+			}
+
+			$choices[ $slug ] = (string) $family['name'];
+		}
+	}
+
+	return $choices;
+}
+
+/**
+ * One font-library choice, as a preset-variable alias, or nothing.
+ *
+ * Accepts only `var(--wp--preset--font-family--slug)`. Anything else — a URL,
+ * an expression, a raw stack — is dropped, so a global-styles value cannot
+ * inject CSS. Pointing a role at itself is also dropped; that declaration
+ * would be circular.
+ *
+ * @since 1.4.4
+ * @param string $role  Preset role being overridden: body, display, masthead.
+ * @param string $value The font-family value from user global styles.
+ * @return string A declaration with no selector, or an empty string.
+ */
+function shadow_digest_font_preset_alias( string $role, string $value ): string {
+	if ( ! preg_match( '/^[a-z0-9-]+$/', $role ) ) {
+		return '';
+	}
+
+	if ( ! preg_match( '/^var\(--wp--preset--font-family--([a-z0-9-]+)\)$/', trim( $value ), $match ) ) {
+		return '';
+	}
+
+	if ( $match[1] === $role ) {
+		return '';
+	}
+
+	return '--wp--preset--font-family--' . $role . ':var(--wp--preset--font-family--' . $match[1] . ');';
+}
+
+/**
+ * CSS variable aliases for font-library choices made in the site editor.
+ *
+ * The newspaper CSS pins body copy and headlines to the body and display
+ * presets. Styles → Typography writes the publisher's choice onto Text and
+ * Headings instead, so this aliases the presets onto those choices.
+ *
+ * @since 1.4.4
+ * @return string Declarations with no selector, or an empty string.
+ */
+function shadow_digest_user_font_aliases(): string {
+	if ( ! class_exists( 'WP_Theme_JSON_Resolver' ) ) {
+		return '';
+	}
+
+	$data = WP_Theme_JSON_Resolver::get_user_data()->get_data();
+	$map  = array(
+		'body'    => $data['styles']['typography']['fontFamily'] ?? '',
+		'display' => $data['styles']['elements']['heading']['typography']['fontFamily'] ?? '',
+	);
+	$css  = '';
+
+	foreach ( $map as $role => $value ) {
+		if ( ! is_string( $value ) ) {
+			continue;
+		}
+
+		$css .= shadow_digest_font_preset_alias( $role, $value );
+	}
+
+	return $css;
+}
+
+/**
  * Sanitise the nameplate typeface choice against the list the control offers.
  *
  * @since 1.0.0
  * @param mixed $value The submitted value.
- * @return string Either 'masthead' or 'display'.
+ * @return string A known font-family slug. Unknown values fall back to masthead.
  */
 function shadow_digest_sanitize_wordmark_font( $value ): string {
-	return in_array( $value, array( 'masthead', 'display' ), true ) ? (string) $value : 'masthead';
+	$slug = is_string( $value ) ? $value : '';
+
+	return isset( shadow_digest_font_family_choices()[ $slug ] ) ? $slug : 'masthead';
 }
 
 /**

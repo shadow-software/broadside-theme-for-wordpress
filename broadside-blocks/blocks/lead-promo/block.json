@@ -5,8 +5,8 @@
 	"title": "Lead Column Promo",
 	"category": "broadside",
 	"icon": "megaphone",
-	"description": "Optional sponsored image at the top of the front-page right column. Configured from the Customizer; renders nothing when unset.",
-	"keywords": ["promo", "ad", "sponsor", "lead"],
+	"description": "Optional sponsored image in the front-page right column. Configured from the Customizer; renders nothing when unset.",
+	"keywords": [ "promo", "ad", "sponsor", "lead" ],
 	"textdomain": "broadside-blocks",
 	"supports": {
 		"html": false,

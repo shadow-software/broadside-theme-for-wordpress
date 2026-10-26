@@ -107,7 +107,8 @@ seconds with a stack trace instead of eating a machine. That is deliberate.
 ```bash
 ./scripts/local-wp.sh up          # throwaway WordPress on :8080, admin/admin
 ./scripts/local-smoke.sh          # every template renders, fast, no fatals
-php scripts/local-assert.php      # the pages are CORRECT (36 assertions)
+php scripts/local-assert.php      # the pages are CORRECT
+php scripts/guard-publisher-features.php  # duotone, fonts, Polylang, editor blocks
 ./scripts/shoot.sh                # screenshot every route, desktop + mobile
 ./scripts/deploy.sh <site>        # gated deploy to ONE site
 ```
@@ -136,20 +137,18 @@ A **block theme** — layout lives in `templates/` and `parts/`, design tokens i
 
 ```
 functions.php            bootstrap; defines SHADOW_DIGEST_* constants
-theme.json               all design tokens — colour, type scale, spacing
+theme.json               design tokens — colour, type, duotone, spacing
 inc/
-  setup.php              theme supports, asset enqueueing
-  customizer.php         ★ every per-site setting lives here
+  setup.php              theme supports, asset enqueueing, Polylang template swap
+  customizer.php         ★ every per-site setting lives here, including the nameplate face
   template-tags.php      masthead, folio, reading time, Roman numerals, avatars
-  blocks.php             editorial blocks + the re-entrancy guard
-  blocks-masthead.php    masthead furniture blocks
+  views.php              view counters; language-aware rankings
   patterns.php           pattern categories
   schema.php             JSON-LD — silent when an SEO plugin is active
-blocks/*/block.json      17 blocks, all PHP-rendered (dynamic)
 templates/               front-page, single, archive, search, 404, page, index
 assets/css/digest.css    everything theme.json cannot express
-assets/js/blocks.js      editor UI — no build step, plain wp.* globals
 assets/fonts/            4 bundled woff2 (SIL OFL) — no CDN calls
+broadside-blocks/        the companion plugin (blocks, editor script). Not part of the theme zip.
 ```
 
 ### The DRY rule
@@ -165,7 +164,7 @@ array. **If you find yourself typing a brand string into a template, stop.**
 | Slug / directory / text domain | `broadside` |
 | Function prefix | `shadow_digest_` |
 | Constant prefix | `SHADOW_DIGEST_` |
-| Block namespace | `shadow-digest/` |
+| Block namespace | `broadside/` |
 | Display name | **Broadside** |
 
 WordPress requires the text domain to equal the directory name. The function

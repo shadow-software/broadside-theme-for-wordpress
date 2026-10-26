@@ -111,16 +111,7 @@ function shadow_digest_enqueue_assets(): void {
 	// rules of its own (see the doc comment in style.css), so enqueueing it was
 	// a render-blocking HTTP request that bought nothing.
 
-	// The real stylesheet: everything theme.json cannot express.
-	wp_enqueue_style(
-		'broadside',
-		SHADOW_DIGEST_URL . 'assets/css/digest.css',
-		array(),
-		SHADOW_DIGEST_VERSION
-	);
-
-	// Per-site branding, injected as custom properties. See inc/customizer.php.
-	wp_add_inline_style( 'broadside', shadow_digest_custom_properties() );
+	wp_enqueue_style( 'broadside' );
 
 	/*
 	 * The newsletter form's progressive enhancement. Loaded only when
@@ -143,6 +134,43 @@ function shadow_digest_enqueue_assets(): void {
 add_action( 'wp_enqueue_scripts', 'shadow_digest_enqueue_assets' );
 
 /**
+ * Register the theme stylesheet early enough for the block editor.
+ *
+ * Block styles ask for the handle `broadside`. The site editor never fires
+ * wp_enqueue_scripts inside its canvas, so a handle registered only there is
+ * missing and the editor cannot paint the blocks. init covers both.
+ *
+ * @since 1.4.4
+ * @return void
+ */
+function shadow_digest_register_style(): void {
+	wp_register_style(
+		'broadside',
+		SHADOW_DIGEST_URL . 'assets/css/digest.css',
+		array(),
+		SHADOW_DIGEST_VERSION
+	);
+
+	// Per-site branding, injected as custom properties. See inc/customizer.php.
+	wp_add_inline_style( 'broadside', shadow_digest_custom_properties() );
+}
+add_action( 'init', 'shadow_digest_register_style' );
+
+/**
+ * Enqueue the theme stylesheet in the editor canvas as well as on the front.
+ *
+ * Priority 5: block styles enqueue the same handle at priority 10, and the
+ * handle has to exist before they ask for it.
+ *
+ * @since 1.4.4
+ * @return void
+ */
+function shadow_digest_enqueue_editor_style(): void {
+	wp_enqueue_style( 'broadside' );
+}
+add_action( 'enqueue_block_assets', 'shadow_digest_enqueue_editor_style', 5 );
+
+/**
  * Push the same custom properties into the block editor.
  *
  * Without this the editor would render the accent colour as the theme's default
@@ -159,20 +187,12 @@ function shadow_digest_enqueue_editor_assets(): void {
 }
 add_action( 'enqueue_block_assets', 'shadow_digest_enqueue_editor_assets' );
 
-/**
- * Remove WordPress's default block-library duotone and global-styles SVG dump.
- *
- * Broadside defines no duotones, so the filter definitions WordPress prints in the
- * footer are dead weight on every page load.
- *
- * @since 1.0.0
- * @return void
+/*
+ * Do not unhook wp_global_styles_render_svg_filters(). Core stopped calling it
+ * in 6.3 (duotone is per block now), and customDuotone plus the presets in
+ * theme.json are what make the control usable. Stripping the action again
+ * would silently drop the filters on any WordPress that still prints them.
  */
-function shadow_digest_trim_head(): void {
-	remove_action( 'wp_body_open', 'wp_global_styles_render_svg_filters' );
-	remove_action( 'in_admin_header', 'wp_global_styles_render_svg_filters' );
-}
-add_action( 'init', 'shadow_digest_trim_head' );
 
 /**
  * Give the body a class describing the current section, so the stylesheet can
@@ -452,3 +472,107 @@ function shadow_digest_aside_query_vars( array $query, WP_Block $block ): array 
 	return $query;
 }
 add_filter( 'query_loop_block_query_vars', 'shadow_digest_aside_query_vars', 10, 2 );
+
+/**
+ * Build a block template object from a saved wp_template / wp_template_part post.
+ *
+ * @since 1.4.4
+ * @param WP_Post $post Saved template.
+ * @return WP_Block_Template
+ */
+function shadow_digest_template_from_post( WP_Post $post ): WP_Block_Template {
+	$template                 = new WP_Block_Template();
+	$template->wp_id          = $post->ID;
+	$template->id             = get_stylesheet() . '//' . $post->post_name;
+	$template->theme          = get_stylesheet();
+	$template->content        = $post->post_content;
+	$template->slug           = $post->post_name;
+	$template->source         = 'custom';
+	$template->origin         = 'custom';
+	$template->type           = $post->post_type;
+	$template->title          = $post->post_title;
+	$template->status         = $post->post_status;
+	$template->has_theme_file = false;
+	$template->is_custom      = true;
+	$template->author         = (int) $post->post_author;
+
+	return $template;
+}
+
+/**
+ * Find a language-specific copy of a theme template.
+ *
+ * Polylang serves one front-page template to every language and filters the
+ * queries, which is the right default. A publisher who needs a different
+ * arrangement for Turkish saves a template whose slug is `front-page-tr` or
+ * `front-page--tr` (the same pattern for `single`, `page`, and the rest).
+ * This only runs on the front end, so the site editor keeps editing the
+ * template that was opened.
+ *
+ * @since 1.4.4
+ * @param WP_Block_Template|null $template      Resolved template.
+ * @param string                 $id            Template id, theme//slug.
+ * @param string                 $template_type wp_template or wp_template_part.
+ * @return WP_Block_Template|null
+ */
+function shadow_digest_polylang_template( $template, $id, $template_type ) {
+	unset( $id );
+
+	if ( ! $template instanceof WP_Block_Template || ! function_exists( 'pll_current_language' ) ) {
+		return $template;
+	}
+
+	if ( is_admin() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) ) {
+		return $template;
+	}
+
+	$lang = pll_current_language();
+
+	if ( ! is_string( $lang ) || ! preg_match( '/^[a-z]{2,3}$/', $lang ) ) {
+		return $template;
+	}
+
+	if ( ! empty( $template->wp_id ) && function_exists( 'pll_get_post' ) ) {
+		$translated = pll_get_post( (int) $template->wp_id, $lang );
+
+		if ( $translated && (int) $translated !== (int) $template->wp_id ) {
+			$post = get_post( (int) $translated );
+
+			if ( $post instanceof WP_Post && $template_type === $post->post_type ) {
+				return shadow_digest_template_from_post( $post );
+			}
+		}
+	}
+
+	$slugs = array(
+		$template->slug . '--' . $lang,
+		$template->slug . '-' . $lang,
+	);
+
+	foreach ( $slugs as $slug ) {
+		$posts = get_posts(
+			array(
+				'name'             => $slug,
+				'post_type'        => $template_type,
+				'post_status'      => 'publish',
+				'numberposts'      => 5,
+				'suppress_filters' => true,
+			)
+		);
+
+		foreach ( $posts as $post ) {
+			if ( ! $post instanceof WP_Post ) {
+				continue;
+			}
+
+			if ( ! has_term( get_stylesheet(), 'wp_theme', $post ) ) {
+				continue;
+			}
+
+			return shadow_digest_template_from_post( $post );
+		}
+	}
+
+	return $template;
+}
+add_filter( 'get_block_template', 'shadow_digest_polylang_template', 20, 3 );

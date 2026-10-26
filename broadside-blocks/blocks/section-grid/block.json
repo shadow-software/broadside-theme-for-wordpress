@@ -5,7 +5,7 @@
 	"title": "Section Grid",
 	"category": "broadside",
 	"icon": "grid-view",
-	"description": "The \"Inside This Week's Edition\" grid: one column per section, each listing its latest headlines. Built from your categories, so a new section appears the moment you use it.",
+	"description": "The \"Inside This Week's Edition\" grid: one column per section, each listing its latest headlines. Leave the category list empty to rank sections by readership, or tick the sections this page should show.",
 	"keywords": [ "sections", "categories", "index", "grid", "edition" ],
 	"textdomain": "broadside-blocks",
 	"supports": {
@@ -28,8 +28,12 @@
 		"heading": {
 			"type": "string",
 			"default": ""
+		},
+		"categories": {
+			"type": "array",
+			"default": [],
+			"items": { "type": "number" }
 		}
 	},
-	"editorScript": "file:../../assets/js/blocks.js",
 	"style": "broadside"
 }

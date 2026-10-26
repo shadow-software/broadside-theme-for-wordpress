@@ -17,6 +17,31 @@ declare( strict_types = 1 );
 defined( 'ABSPATH' ) || exit;
 
 /**
+ * Let Polylang filter a secondary query.
+ *
+ * get_posts() suppresses filters unless told not to, which drops the language
+ * clause. Category terms are already per-language under Polylang; this keeps
+ * the post list in that language too.
+ *
+ * @since 1.4.4
+ * @param array<string, mixed> $args Query arguments.
+ * @return array<string, mixed>
+ */
+function shadow_digest_language_query_args( array $args ): array {
+	$args['suppress_filters'] = false;
+
+	if ( function_exists( 'pll_current_language' ) ) {
+		$lang = pll_current_language();
+
+		if ( is_string( $lang ) && '' !== $lang ) {
+			$args['lang'] = $lang;
+		}
+	}
+
+	return $args;
+}
+
+/**
  * Meta key for the per-post view counter.
  */
 const SHADOW_DIGEST_VIEWS_META = '_digest_views';
@@ -68,9 +93,11 @@ function shadow_digest_categories_by_views( int $limit = 6 ): array {
 	$limit = max( 1, min( 24, $limit ) );
 
 	$categories = get_categories(
-		array(
-			'hide_empty' => true,
-			'number'     => 100,
+		shadow_digest_language_query_args(
+			array(
+				'hide_empty' => true,
+				'number'     => 100,
+			)
 		)
 	);
 
@@ -82,13 +109,15 @@ function shadow_digest_categories_by_views( int $limit = 6 ): array {
 
 	foreach ( $categories as $category ) {
 		$posts = get_posts(
-			array(
-				'category'            => (int) $category->term_id,
-				'numberposts'         => -1,
-				'post_status'         => 'publish',
-				'fields'              => 'ids',
-				'no_found_rows'       => true,
-				'ignore_sticky_posts' => true,
+			shadow_digest_language_query_args(
+				array(
+					'category'            => (int) $category->term_id,
+					'numberposts'         => -1,
+					'post_status'         => 'publish',
+					'fields'              => 'ids',
+					'no_found_rows'       => true,
+					'ignore_sticky_posts' => true,
+				)
 			)
 		);
 
@@ -151,17 +180,19 @@ function shadow_digest_posts_by_views( int $limit = 3, int $window_days = 30 ): 
 	// far, which is exactly a brand-new article that deserves a chance to
 	// surface, not exclusion.
 	$posts = get_posts(
-		array(
-			'numberposts'         => 100,
-			'post_status'         => 'publish',
-			'fields'              => 'ids',
-			'no_found_rows'       => true,
-			'ignore_sticky_posts' => true,
-			'date_query'          => array(
-				array( 'after' => $window_days . ' days ago' ),
-			),
-			'orderby'             => 'date',
-			'order'               => 'DESC',
+		shadow_digest_language_query_args(
+			array(
+				'numberposts'         => 100,
+				'post_status'         => 'publish',
+				'fields'              => 'ids',
+				'no_found_rows'       => true,
+				'ignore_sticky_posts' => true,
+				'date_query'          => array(
+					array( 'after' => $window_days . ' days ago' ),
+				),
+				'orderby'             => 'date',
+				'order'               => 'DESC',
+			)
 		)
 	);
 
