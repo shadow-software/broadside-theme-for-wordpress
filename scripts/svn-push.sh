@@ -35,6 +35,6 @@ unzip -q "$ZIP" -d "$STAGE"
 # zip top-level is the slug directory
 rsync -a "$STAGE/${SLUG}/" "$WC/$VER/"
 svn add "$WC/$VER"
-svn commit -m "Broadside ${VER} — Theme Directory review: remove accessibility-ready and GitHub Theme URI" \
+svn commit -m "Broadside ${VER}" \
 	--username "$USER" --password "$PASS" --non-interactive "$WC"
 echo "════ done → ${SVN_URL}/${VER}/"

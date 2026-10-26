@@ -231,15 +231,23 @@ else
 	fi
 fi
 
-# Is the slug already taken on wordpress.org? A 200 means someone owns it, and
-# shipping under it is worse than a rejection: WordPress matches update payloads
-# by slug, so a site running this theme could be auto-updated to a stranger's.
+# Is the slug already taken on wordpress.org? A 200 from a stranger is worse
+# than a rejection: WordPress matches update payloads by slug, so a site running
+# this theme could be auto-updated to someone else's. A 200 that names Shadow
+# Software is our own listing (the theme has been on the Directory since 1.3.4).
 # Skipped without network (CI has one; an offline developer does not).
 if curl -s -o /dev/null --max-time 8 "https://wordpress.org/themes/$SLUG/" 2>/dev/null; then
 	code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 8 "https://wordpress.org/themes/$SLUG/" || echo 000)
 	case "$code" in
 		404) okay "wordpress.org/themes/$SLUG/ is free (404)" ;;
-		200) note "wordpress.org/themes/$SLUG/ ALREADY EXISTS — pick another name" ;;
+		200)
+			page=$(curl -fsSL --max-time 8 "https://wordpress.org/themes/$SLUG/" || true)
+			if printf '%s' "$page" | grep -q 'Shadow Software'; then
+				okay "wordpress.org/themes/$SLUG/ is our listing"
+			else
+				note "wordpress.org/themes/$SLUG/ ALREADY EXISTS — pick another name"
+			fi
+			;;
 		*)   echo "   · could not check the Directory (HTTP $code) — verify by hand" ;;
 	esac
 else
