@@ -3,7 +3,7 @@ Contributors: shadowsoftware
 Requires at least: 7.0
 Tested up to: 7.0
 Requires PHP: 8.5
-Stable tag: 1.4.4
+Stable tag: 1.4.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Tags: news, blog, one-column, two-columns, three-columns, custom-colors, custom-logo, custom-menu, block-patterns, block-styles, editor-style, featured-images, full-site-editing, rtl-language-support, style-variations, template-editing, translation-ready, wide-blocks
@@ -201,6 +201,9 @@ The front page's lead photograph is no longer lazy-loaded. If you run Broadside 
 a site that is measured on Core Web Vitals, this release is worth taking.
 
 == Changelog ==
+
+= 1.4.5 =
+* The footer again shows the podcast directory and YouTube links, and the publisher's legal name. The 1.4.4 editor fix had shipped a colophon without them.
 
 = 1.4.4 =
 * Duotone works in the editor. The theme no longer strips the SVG filters WordPress uses to paint it, and ships two duotone presets plus custom duotones.

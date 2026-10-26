@@ -217,11 +217,6 @@ check( str_contains( $fp['body'], 'digest-lead' ), 'the three-column lead grid i
 check( str_contains( $fp['body'], 'digest-nameplate' ), 'the nameplate is present' );
 check( str_contains( $fp['body'], 'digest-folio' ), 'the folio rule is present' );
 check( str_contains( $fp['body'], 'digest-section' ), 'the section grid is present' );
-check(
-	str_contains( $fp['body'], '--wp--preset--duotone--ink-paper' ),
-	'the ink-on-paper duotone preset is in the page CSS',
-	'customDuotone or the preset was removed — the editor control Futuristika needs will error again'
-);
 
 echo "\n── The lead story well — real prose, not a teaser\n";
 
@@ -462,6 +457,18 @@ PHP;
 	check( '' === $missing, 'every template block is registered', $missing );
 
 	$eval = <<<'PHP'
+$color   = wp_get_global_settings( array( 'color' ) );
+$presets = $color['duotone']['theme'] ?? $color['duotone'] ?? array();
+$slugs   = array();
+foreach ( (array) $presets as $preset ) {
+	if ( is_array( $preset ) && isset( $preset['slug'] ) ) {
+		$slugs[] = $preset['slug'];
+	}
+}
+$duotone = ! empty( $color['customDuotone'] )
+	&& in_array( 'ink-paper', $slugs, true )
+	&& in_array( 'accent-paper', $slugs, true );
+echo $duotone ? 'D' : '-';
 $cats = get_categories( array( 'number' => 1, 'hide_empty' => false ) );
 if ( empty( $cats ) || ! isset( $cats[0]->term_id ) ) {
 	echo 'NOCAT';
@@ -491,8 +498,8 @@ PHP;
 	$got = trim( (string) shell_exec( $cmd . ' 2>&1' ) );
 
 	check(
-		str_starts_with( $got, 'HNQFRS' ),
-		'chosen sections, language queries and font aliases behave',
+		str_starts_with( $got, 'DHNQFRS' ),
+		'duotone presets, chosen sections, language queries and font aliases behave',
 		$got
 	);
 }

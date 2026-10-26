@@ -3,7 +3,7 @@
  * Plugin Name:       Broadside Blocks
  * Plugin URI:        https://github.com/shadow-software/broadside-blocks-for-wordpress
  * Description:       The editorial blocks and masthead furniture for the Broadside theme — a short-answer box, key takeaways, a self-building table of contents, an FAQ that emits FAQPage schema, a sources list, a disclosure table, and the nameplate, folio rule and bylines a broadsheet needs.
- * Version:           1.4.4
+ * Version:           1.4.5
  * Requires at least: 7.0
  * Requires PHP:      8.5
  * Author:            Shadow Software LLC
@@ -73,7 +73,7 @@ defined( 'ABSPATH' ) || exit;
  */
 define( 'BROADSIDE_BLOCKS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'BROADSIDE_BLOCKS_URL', plugin_dir_url( __FILE__ ) );
-define( 'BROADSIDE_BLOCKS_VERSION', '1.4.4' );
+define( 'BROADSIDE_BLOCKS_VERSION', '1.4.5' );
 
 /**
  * Is the Broadside theme active?

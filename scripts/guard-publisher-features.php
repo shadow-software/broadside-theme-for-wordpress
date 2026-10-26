@@ -157,6 +157,9 @@ feature_check(
 	str_contains( (string) file_get_contents( $plugin . '/broadside-blocks.php' ), 'broadside_blocks_enqueue_editor_script' ),
 	'vendored plugin enqueues the editor script once'
 );
+$masthead = (string) file_get_contents( $plugin . '/inc-blocks-masthead.php' );
+feature_check( str_contains( $masthead, 'digest-footer__podcast-link' ), 'vendored colophon prints the podcast directory link' );
+feature_check( str_contains( $masthead, 'digest-footer__youtube-link' ), 'vendored colophon prints the YouTube link' );
 
 echo "\n";
 
