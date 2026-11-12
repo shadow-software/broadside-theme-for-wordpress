@@ -12,7 +12,7 @@
 
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-BASE="http://localhost:8080"
+BASE="http://localhost:${BROADSIDE_LOCAL_PORT:-8080}"
 LOG="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/.local-wp.log"
 FAIL=0
 

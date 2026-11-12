@@ -56,52 +56,66 @@ function shadow_digest_schema_node_is_article( $type ): bool {
  * @return array<string, mixed>
  */
 function shadow_digest_rank_math_json_ld( array $data, $jsonld ): array {
-	if ( ! is_singular( 'post' ) ) {
-		return $data;
-	}
-
+	// Rank Math may run this filter before the global $post is set; fall back to the
+	// queried object ID that the main query (or Rank Math) already resolved.
 	$post = get_post();
 	if ( ! $post instanceof WP_Post ) {
-		return $data;
+		$queried = get_queried_object();
+		if ( $queried instanceof WP_Post ) {
+			$post = $queried;
+		} else {
+			$queried_id = (int) get_queried_object_id();
+			if ( $queried_id > 0 ) {
+				$post = get_post( $queried_id );
+			}
+		}
 	}
-
-	$permalink = (string) get_permalink( $post );
-	$graph     = array();
-
-	if ( isset( $data['@graph'] ) && is_array( $data['@graph'] ) ) {
-		$graph = $data['@graph'];
-	} elseif ( isset( $data['Article'] ) && is_array( $data['Article'] ) ) {
-		$graph = array( $data['Article'] );
-	}
-
-	if ( empty( $graph ) ) {
-		return $data;
-	}
-
+	$permalink  = ( $post instanceof WP_Post ) ? (string) get_permalink( $post ) : '';
+	$uses_graph = isset( $data['@graph'] ) && is_array( $data['@graph'] );
 	$article_id = '';
-	foreach ( $graph as $index => $node ) {
+	$targets    = $uses_graph ? $data['@graph'] : $data;
+
+	if ( ! is_array( $targets ) || empty( $targets ) ) {
+		return $data;
+	}
+
+	foreach ( $targets as $key => $node ) {
 		if ( ! is_array( $node ) ) {
 			continue;
 		}
 
 		if ( shadow_digest_schema_node_is_article( $node['@type'] ?? '' ) ) {
-			$graph[ $index ]['@type'] = 'NewsArticle';
-			$article_id               = (string) ( $node['@id'] ?? $permalink . '#article' );
+			$targets[ $key ]['@type'] = 'NewsArticle';
+			$article_id               = (string) ( $node['@id'] ?? ( '' !== $permalink ? $permalink . '#article' : '' ) );
 		}
+	}
+
+	if ( $uses_graph ) {
+		$data['@graph'] = $targets;
+	} else {
+		$data = $targets;
+	}
+
+	if ( ! $post instanceof WP_Post || 'post' !== $post->post_type ) {
+		return $data;
+	}
+
+	if ( '' === $permalink ) {
+		$permalink = (string) get_permalink( $post );
 	}
 
 	$video_url = (string) get_post_meta( $post->ID, SHADOW_DIGEST_PODCAST_META_VIDEO_URL, true );
 	if ( '' !== $video_url && wp_http_validate_url( $video_url ) ) {
 		$video_id   = $permalink . '#episode-video';
 		$video_node = array(
-			'@type'      => 'VideoObject',
-			'@id'        => $video_id,
-			'name'       => shadow_digest_plain_text( get_the_title( $post ) ),
-			'description'=> shadow_digest_plain_text( get_the_excerpt( $post ) ),
-			'uploadDate' => (string) get_the_date( DATE_W3C, $post ),
-			'contentUrl' => esc_url_raw( $video_url ),
-			'embedUrl'   => $permalink,
-			'inLanguage' => get_bloginfo( 'language' ),
+			'@type'       => 'VideoObject',
+			'@id'         => $video_id,
+			'name'        => shadow_digest_plain_text( get_the_title( $post ) ),
+			'description' => shadow_digest_plain_text( get_the_excerpt( $post ) ),
+			'uploadDate'  => (string) get_the_date( DATE_W3C, $post ),
+			'contentUrl'  => esc_url_raw( $video_url ),
+			'embedUrl'    => $permalink,
+			'inLanguage'  => get_bloginfo( 'language' ),
 		);
 
 		if ( has_post_thumbnail( $post ) ) {
@@ -116,35 +130,59 @@ function shadow_digest_rank_math_json_ld( array $data, $jsonld ): array {
 			$video_node['duration'] = shadow_digest_podcast_duration_to_iso8601( $duration );
 		}
 
-		$graph[] = $video_node;
+		if ( $uses_graph ) {
+			$data['@graph'][] = $video_node;
+			$link_targets     = &$data['@graph'];
+		} else {
+			$data['digest-episode-video'] = $video_node;
+			$link_targets                 = &$data;
+		}
 
 		if ( '' !== $article_id ) {
-			foreach ( $graph as $index => $node ) {
+			foreach ( $link_targets as $index => $node ) {
 				if ( ! is_array( $node ) ) {
 					continue;
 				}
 				if ( ( $node['@id'] ?? '' ) === $article_id || 'NewsArticle' === ( $node['@type'] ?? '' ) ) {
-					$graph[ $index ]['video'] = array( '@id' => $video_id );
+					$link_targets[ $index ]['video'] = array( '@id' => $video_id );
 					break;
 				}
 			}
 		}
 	}
 
-	if ( isset( $data['@graph'] ) ) {
-		$data['@graph'] = $graph;
-	} elseif ( isset( $data['Article'] ) ) {
-		foreach ( $graph as $node ) {
-			if ( is_array( $node ) && 'NewsArticle' === ( $node['@type'] ?? '' ) ) {
-				$data['Article'] = $node;
-				break;
+	// Publisher identity (legalName / foundingDate) from theme Customizer — same
+	// data the Digest Publisher Schema mu-plugin used to inject when the hook
+	// lived in mu-plugins; kept here so one callback owns the Rank Math graph.
+	if ( function_exists( 'shadow_digest_publisher_legal' ) && function_exists( 'shadow_digest_founded' ) ) {
+		$legal   = shadow_digest_publisher_legal();
+		$founded = shadow_digest_founded();
+		if ( '' !== $legal || $founded ) {
+			$targets = isset( $data['@graph'] ) && is_array( $data['@graph'] ) ? $data['@graph'] : $data;
+			foreach ( $targets as $key => $node ) {
+				if ( ! is_array( $node ) ) {
+					continue;
+				}
+				$type = $node['@type'] ?? '';
+				if ( ! in_array( $type, array( 'Organization', 'NewsMediaOrganization', 'Publisher' ), true ) ) {
+					continue;
+				}
+				if ( '' !== $legal ) {
+					$targets[ $key ]['legalName'] = $legal;
+				}
+				if ( $founded ) {
+					$targets[ $key ]['foundingDate'] = (string) $founded;
+				}
+			}
+			if ( isset( $data['@graph'] ) ) {
+				$data['@graph'] = $targets;
 			}
 		}
 	}
 
 	return $data;
 }
-add_filter( 'rank_math/json_ld', 'shadow_digest_rank_math_json_ld', 99, 2 );
+add_filter( 'rank_math/json_ld', 'shadow_digest_rank_math_json_ld', 999, 2 );
 
 /**
  * Convert podcast duration (mm:ss or hh:mm:ss) to ISO-8601 duration for VideoObject.

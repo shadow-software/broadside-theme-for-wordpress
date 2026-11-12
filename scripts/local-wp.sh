@@ -33,7 +33,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WP="$ROOT/.local-wp"
-PORT=8080
+PORT="${BROADSIDE_LOCAL_PORT:-8080}"
 THEME_SRC="$ROOT/broadside"
 THEME_DST="$WP/wp-content/themes/broadside"
 

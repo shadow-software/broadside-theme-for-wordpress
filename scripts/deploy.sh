@@ -93,14 +93,17 @@ fi
 
 echo
 echo "════ GATE 3/5 — local sandbox is up"
-if ! curl -sf -o /dev/null --max-time 5 http://localhost:8080/ 2>/dev/null; then
+LOCAL_PORT="${BROADSIDE_LOCAL_PORT:-8080}"
+export BROADSIDE_LOCAL_PORT="$LOCAL_PORT"
+
+if ! curl -sf -o /dev/null --max-time 5 "http://localhost:${LOCAL_PORT}/" 2>/dev/null; then
   red "✗ the local sandbox is not running."
-  echo "  Start it:  ./scripts/local-wp.sh up"
+  echo "  Start it:  BROADSIDE_LOCAL_PORT=${LOCAL_PORT} ./scripts/local-wp.sh up"
   echo "  Nothing deploys that has not rendered locally first. That rule is the"
   echo "  entire lesson of the incident."
   exit 1
 fi
-echo "   ✓ running on :8080"
+echo "   ✓ running on :${LOCAL_PORT}"
 
 echo
 echo "════ GATE 4/5 — every template renders (liveness)"

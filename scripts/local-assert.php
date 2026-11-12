@@ -24,7 +24,7 @@
 
 declare( strict_types = 1 );
 
-$base = 'http://localhost:8080';
+$base = 'http://localhost:' . ( getenv( 'BROADSIDE_LOCAL_PORT' ) ?: '8080' );
 $fail = 0;
 $pass = 0;
 
