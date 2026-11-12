@@ -3,7 +3,7 @@ Contributors: shadowsoftware
 Requires at least: 7.0
 Tested up to: 7.0
 Requires PHP: 8.5
-Stable tag: 1.4.5
+Stable tag: 1.4.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Tags: news, blog, one-column, two-columns, three-columns, custom-colors, custom-logo, custom-menu, block-patterns, block-styles, editor-style, featured-images, full-site-editing, rtl-language-support, style-variations, template-editing, translation-ready, wide-blocks
@@ -201,6 +201,11 @@ The front page's lead photograph is no longer lazy-loaded. If you run Broadside 
 a site that is measured on Core Web Vitals, this release is worth taking.
 
 == Changelog ==
+
+= 1.4.6 =
+* Rank Math integration: editorial posts emit NewsArticle (not generic Article), podcast
+  episodes with a video companion also emit VideoObject on the same URL, and legacy
+  short permalinks 301 to the dated canonical.
 
 = 1.4.5 =
 * The footer again shows the podcast directory and YouTube links, and the publisher's legal name. The 1.4.4 editor fix had shipped a colophon without them.
